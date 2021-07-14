@@ -1,0 +1,12 @@
+.dockerignore
+Dockerfile
+docker-compose.yml
+.gitignore
+.vs
+Pomelo/bin
+Pomelo/obj
+Pomelo/wwwroot
+Pomelo/Pomelo.db
+Pomelo/Pomelo.db-shm
+Pomelo/Pomelo.db-wal
+Frontend/node_modules

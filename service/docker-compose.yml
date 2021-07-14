@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  pomelo:
+    build: .
+    ports:
+      - "5000:80"
+  node:
+    image: node
+    entrypoint: sleep 9999999
+    volumes:
+      - "./Frontend:/Frontend"
