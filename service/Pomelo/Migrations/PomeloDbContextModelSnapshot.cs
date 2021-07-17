@@ -47,6 +47,10 @@ namespace Pomelo.Migrations
                     b.Property<DateTime>("Begin")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Department")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("End")
                         .HasColumnType("TEXT");
 

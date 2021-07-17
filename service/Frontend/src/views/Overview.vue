@@ -1,21 +1,56 @@
 <template>
-  <h2>Overview</h2>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+  <h2> Overview</h2>
+  <div>
+    <table>
+      <thead>
+        <tr>
+          <td>Name</td>
+          <td>Begin</td>
+          <td>End</td>
+          <td>Absolute Deviation</td>
+          <td>Relative Deviation</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="project in this.projects" :key="project.id">
+          <td><router-link :to="{name: 'Project', params: { projectId: project.id }}">{{ project.name }}</router-link></td>
+          <td>{{ project.begin }}</td>
+          <td>{{ project.end }}</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
+  <input v-model="projectName" placeholder="projectName">
+  <button @click="this.createProject()">Create Project</button>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import HelloWorld from '@/components/HelloWorld.vue' // @ is an alias to /src
-import About from './About.vue'
+import { getProjectDepartmentProjects, postProjectCreate, Project } from '@/services/pomeloAPI'
+import { defineComponent, inject } from 'vue'
 
 export default defineComponent({
-  name: 'Home',
-  components: {
-    HelloWorld,
-    About
+  name: 'Overview',
+  created() {
+    this.init()
+  },
+  data() {
+    return {
+      projectName: null as string | null,
+      projects: [] as Project[]
+    }
+  },
+  methods: {
+    async createProject() {
+      if (this.projectName !== null) {
+        await postProjectCreate(this.projectName, new Date(), new Date())
+        await this.init()
+      }
+    },
+    async init() {
+      this.projects = await getProjectDepartmentProjects()
+    }
   }
 })
 </script>

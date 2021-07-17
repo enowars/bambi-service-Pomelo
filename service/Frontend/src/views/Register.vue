@@ -1,24 +1,31 @@
 <template>
   <h2>Register</h2>
   <div>
-    <input v-model="message" placeholder="employeeName">
-    <button @click="store.storeMethods.tryRegister('a','a')">Register</button>
+    <input v-model="name" placeholder="name">
+    <input v-model="department" placeholder="department">
+    <button @click="register()">Register</button>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, inject } from 'vue'
+import { postAccountRegister } from '@/services/pomeloAPI'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'Register',
-  setup(_props) {
-    const store = inject('store')
-
+  data() {
     return {
-      store
+      name: null as string | null,
+      department: null as string | null
     }
   },
-  components: {
+  methods: {
+    async register() {
+      if (this.name != null && this.department != null) {
+        const employee = await postAccountRegister(this.name, this.department)
+        this.$router.push({ name: 'Overview' })
+      }
+    }
   }
 })
 </script>

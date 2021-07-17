@@ -30,7 +30,7 @@
         [HttpPost]
         public async Task<IActionResult> Register([FromForm] string employeeName, [FromForm] string department)
         {
-            this.logger.LogDebug($"POST Register({employeeName}, {department})");
+            this.logger.LogDebug($"POST /account/register({employeeName}, {department})");
             var newEmployee = new Employee()
             {
                 Name = employeeName,
@@ -71,16 +71,16 @@
         }
 
         [HttpGet]
-        public async Task<IActionResult> Latest()
+        public async Task<ActionResult<Employee[]>> Latest()
         {
-            return this.Json(await this.dbContext.Employees
+            return await this.dbContext.Employees
                 .OrderByDescending(e => e.Id)
                 .Take(10)
-                .ToArrayAsync(this.HttpContext.RequestAborted));
+                .ToArrayAsync(this.HttpContext.RequestAborted);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Note([FromForm] string newNote)
+        public async Task<ActionResult<Employee>> Note([FromForm] string newNote)
         {
             var owner = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (owner == null)
@@ -93,7 +93,7 @@
                 .FirstAsync(this.HttpContext.RequestAborted);
             dbOwner.Note = newNote;
             await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
-            return this.Json(dbOwner);
+            return dbOwner;
         }
 
         [HttpGet]

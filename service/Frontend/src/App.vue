@@ -1,35 +1,31 @@
 <template>
-  <div v-if="!store.storeMethods.getLoggedIn()">
-    not logged in!
-    <Register/>
+  <div id="nav">
+    <router-link to="/">Overview</router-link> |
+    <router-link to="/project">Project</router-link> |
+    <router-link to="/user">User</router-link>
   </div>
-  <div v-else>
-    <div id="nav">
-      <router-link to="/">Overview</router-link> |
-      <router-link to="/about">Project</router-link> |
-      <router-link to="/user">User</router-link>
-    </div>
-    <router-view/>
-  </div>
+  <router-view/>
 </template>
 
 <script lang="ts">
-import { provide } from 'vue'
-import store from '@/store'
-import Register from '@/views/Register.vue'
-store.storeMethods.init()
+import { defineComponent } from 'vue'
+import { getAccountInfo } from './services/pomeloAPI'
 
-export default {
-  setup() {
-    provide('store', store)
-    return {
-      store
-    }
+export default defineComponent({
+  created() {
+    this.init()
   },
-  components: {
-    Register
+  methods: {
+    async init() {
+      const accountInfo = await getAccountInfo()
+      if (accountInfo === null) {
+        this.$router.push({ name: 'Register' })
+      } else {
+        console.log(accountInfo)
+      }
+    }
   }
-}
+})
 </script>
 
 <style>

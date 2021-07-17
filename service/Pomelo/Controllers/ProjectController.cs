@@ -22,6 +22,28 @@
             this.dbContext = dbContext;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> DepartmentProjects()
+        {
+            var owner = this.HttpContext.User.FindFirst(ClaimTypes.Name)?.Value;
+            if (owner == null)
+            {
+                return this.Forbid();
+            }
+
+            var dbOwner = await this.dbContext.Employees
+                .Where(e => e.Name == owner)
+                .FirstAsync(this.HttpContext.RequestAborted);
+
+            var projects = await this.dbContext.Projects
+                .Where(p => p.Department == dbOwner.Department)
+                .Include(p => p.TotalPlannings)
+                .Include(p => p.WeeklyCapacities)
+                .ToArrayAsync(this.HttpContext.RequestAborted);
+
+            return this.Json(projects);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromForm]string name, [FromForm] DateTime begin, [FromForm] DateTime end)
         {
@@ -37,6 +59,7 @@
             var newProject = new Project()
             {
                 Owner = dbOwner,
+                Department = dbOwner.Department,
                 Name = name,
                 Begin = begin,
                 End = end,
