@@ -5,11 +5,20 @@ export interface Employee {
   note: string | null
 }
 
+export interface TotalPlanning {
+  id: number,
+  employeeId: number,
+  projectId: number,
+  totalHours: number,
+  performedHours: number
+}
+
 export interface Project {
   id: number,
   name: string,
   begin: Date,
-  end: Date
+  end: Date,
+  totalPlannings: TotalPlanning[]
 }
 
 export const getAccountInfo = async () : Promise<Employee | null> => {
@@ -49,4 +58,34 @@ export const getProjectDepartmentProjects = async () : Promise<Project[]> => {
   return await fetch('/api/project/departmentprojects', {
     method: 'GET'
   }).then(val => val.json()) as Project[]
+}
+
+export const getProjectDetails = async (projectId: number) : Promise<Project> => {
+  return await fetch('/api/project/details?projectId=' + projectId, {
+    method: 'GET'
+  }).then(val => val.json()) as Project
+}
+
+export const getAccountDepartment = async () : Promise<Employee[]> => {
+  return await fetch('/api/account/department', {
+    method: 'GET'
+  }).then(val => val.json()) as Employee[]
+}
+
+export const postProjectTotalPlanning = async (employeeId: number, projectId: number, hours: number) : Promise<TotalPlanning | null> => {
+  console.log(employeeId)
+  console.log(projectId)
+  console.log(hours)
+  const form = new FormData()
+  form.append('employeeId', employeeId.toString())
+  form.append('projectId', projectId.toString())
+  form.append('hours', hours.toString())
+  try {
+    return await fetch('/api/project/totalplanning', {
+      method: 'POST',
+      body: form
+    }).then(val => val.json()) as TotalPlanning
+  } catch {
+    return null
+  }
 }

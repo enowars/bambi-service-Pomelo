@@ -5,6 +5,8 @@ services:
     build: .
     ports:
       - "5000:80"
+    volumes:
+      - "./data:/data"
   node:
     image: node
     entrypoint: sleep 9999999

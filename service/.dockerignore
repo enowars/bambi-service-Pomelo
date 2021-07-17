@@ -3,6 +3,7 @@ Dockerfile
 docker-compose.yml
 .gitignore
 .vs
+/data
 Pomelo/bin
 Pomelo/obj
 Pomelo/wwwroot

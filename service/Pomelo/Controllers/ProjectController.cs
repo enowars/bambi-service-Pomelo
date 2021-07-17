@@ -37,11 +37,49 @@
 
             var projects = await this.dbContext.Projects
                 .Where(p => p.Department == dbOwner.Department)
-                .Include(p => p.TotalPlannings)
-                .Include(p => p.WeeklyCapacities)
                 .ToArrayAsync(this.HttpContext.RequestAborted);
 
             return this.Json(projects);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(long projectId)
+        {
+            var user = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (user == null)
+            {
+                return this.Forbid();
+            }
+
+            var dbUser = await this.dbContext.Employees
+                .Where(e => e.Id == long.Parse(user))
+                .AsNoTracking()
+                .SingleAsync(this.HttpContext.RequestAborted);
+
+            var project = await this.dbContext.Projects
+                .Where(p => p.Id == projectId)
+                .AsNoTracking()
+                .SingleAsync(this.HttpContext.RequestAborted);
+
+            if (project.Department != dbUser.Department)
+            {
+                return this.Forbid();
+            }
+
+            var plannings = await this.dbContext.TotalPlannings
+                .Where(tp => tp.ProjectId == projectId)
+                .AsNoTracking()
+                .ToListAsync(this.HttpContext.RequestAborted);
+
+            var capacities = await this.dbContext.WeeklyCapacities
+                .Where(wc => wc.ProjectId == projectId)
+                .AsNoTracking()
+                .ToListAsync(this.HttpContext.RequestAborted);
+
+            project.TotalPlannings = plannings;
+            project.WeeklyCapacities = capacities;
+
+            return this.Json(project);
         }
 
         [HttpPost]

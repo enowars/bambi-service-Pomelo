@@ -357,6 +357,7 @@ MigrationBackup/
 .ionide/
 
 .vscode/
+/data
 Pomelo/Pomelo.db
 Pomelo/Pomelo.db-shm
 Pomelo/Pomelo.db-wal

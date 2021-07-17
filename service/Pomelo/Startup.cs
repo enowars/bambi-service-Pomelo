@@ -2,10 +2,12 @@ namespace Pomelo
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Features;
@@ -23,6 +25,8 @@ namespace Pomelo
         public void ConfigureServices(IServiceCollection services)
         {
             // services.AddLogging();
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo("/data"));
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
@@ -35,7 +39,7 @@ namespace Pomelo
                         },
                     };
                 });
-            services.AddDbContextFactory<PomeloDbContext>(builder => builder.UseSqlite(@"Data Source=Pomelo.db"));
+            services.AddDbContextFactory<PomeloDbContext>(builder => builder.UseSqlite(@"Data Source=/data/Pomelo.db"));
             services.AddDbContext<PomeloDbContext>();
             services.AddMvc();
             services.AddSwaggerGen();

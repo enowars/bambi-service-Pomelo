@@ -5,11 +5,13 @@ COPY Pomelo Pomelo
 RUN dotnet publish Pomelo/Pomelo.csproj -c Release -o /app
 
 FROM node AS frontend-build
+RUN npm i -g vue-type-check
 COPY Frontend/package.json Frontend/package.json
 COPY Frontend/package-lock.json Frontend/package-lock.json
 WORKDIR /Frontend
 RUN npm install
 COPY /Frontend .
+RUN vtc --workspace . --srcDir ./src
 RUN npm run build
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0

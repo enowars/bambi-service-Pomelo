@@ -156,5 +156,26 @@
 
             return this.NoContent();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Department()
+        {
+            this.logger.LogInformation($"GET Department");
+            var user = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (user == null)
+            {
+                return this.Forbid();
+            }
+
+            var employee = await this.dbContext.Employees
+                .Where(e => e.Id == long.Parse(user))
+                .SingleAsync(this.HttpContext.RequestAborted);
+
+            var department = await this.dbContext.Employees
+                .Where(e => e.Department == employee.Department)
+                .ToArrayAsync(this.HttpContext.RequestAborted);
+
+            return this.Json(department);
+        }
     }
 }
