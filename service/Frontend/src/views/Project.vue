@@ -14,7 +14,7 @@
       </thead>
       <tbody>
         <tr v-for="hours in this.project.totalPlannings" :key="hours.id">
-          <td>{{ hours.employeeId }}</td>
+          <td>{{getName(hours.employeeId) }}</td>
           <td>{{ hours.totalHours }}</td>
           <td>{{ hours.performedHours }}</td>
           <td>0</td>
@@ -47,6 +47,7 @@ export default defineComponent({
     return {
       projectId: Number(useRoute().params.projectId),
       project: null as Project | null,
+      departmentEmployees: [] as Employee[],
       uninvolvedEmployees: [] as Employee[],
       plannedHours: null as number | null,
       newEmployee: null as Employee | null,
@@ -59,8 +60,8 @@ export default defineComponent({
   methods: {
     async init() {
       this.project = await getProjectDetails(this.projectId)
-      const departmentEmployees = await getAccountDepartment()
-      this.uninvolvedEmployees = departmentEmployees
+      this.departmentEmployees = await getAccountDepartment()
+      this.uninvolvedEmployees = this.departmentEmployees
     },
     async add() {
       if (this.newEmployee != null && this.newHours != null) {
@@ -71,6 +72,13 @@ export default defineComponent({
         console.log('invalid arguments')
         console.log(this.newEmployee)
       }
+    },
+    getName(employeeId: number) {
+      const employee = this.departmentEmployees.find(e => e.id === employeeId)
+      if (employee) {
+        return employee.name
+      }
+      return 'UNKNOWN'
     }
   }
 })

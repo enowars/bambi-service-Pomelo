@@ -43,6 +43,7 @@ The project creation leaks all properties of first user with that name, includin
 
 ### Join forgein project and get details
 
+### Add foreign user to project and get note?
 
 ### DB Leak?
 The sqlite3 database was in the wwwroot, and thus served to any requesting user agent.
@@ -65,3 +66,6 @@ The UUID of a department is leaked, an can be used to join a department
 - leak signing key thorugh LFI?
 
 
+# TODO
+- index over departmentname
+- unique index over TotalPlanning's (emplyeeId, projectId)
