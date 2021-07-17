@@ -3,7 +3,7 @@
   <div>
     <input v-model="name" placeholder="name">
     <input v-model="department" placeholder="department">
-    <button @click="register()">Register</button>
+    <button @click="this.register()">Register</button>
   </div>
 </template>
 

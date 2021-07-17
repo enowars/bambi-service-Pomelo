@@ -7,7 +7,9 @@ export interface Employee {
 
 export interface Project {
   id: number,
-  name: string
+  name: string,
+  begin: Date,
+  end: Date
 }
 
 export const getAccountInfo = async () : Promise<Employee | null> => {

@@ -28,7 +28,7 @@
 
 <script lang="ts">
 import { getProjectDepartmentProjects, postProjectCreate, Project } from '@/services/pomeloAPI'
-import { defineComponent, inject } from 'vue'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'Overview',
