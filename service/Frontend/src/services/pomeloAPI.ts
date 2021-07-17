@@ -16,8 +16,8 @@ export interface TotalPlanning {
 export interface Project {
   id: number,
   name: string,
-  begin: Date,
-  end: Date,
+  begin: string,
+  end: string,
   totalPlannings: TotalPlanning[]
 }
 

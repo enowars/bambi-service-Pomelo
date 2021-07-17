@@ -1,5 +1,5 @@
 <template>
-  <div v-if="this.project">
+  <div v-if="this.project" style="width=80%;">
     <h2>{{ this.project.name }}</h2>
 
     <table>
@@ -33,6 +33,10 @@
       <input type="number" v-model="newHours" placeholder="planned hours">
       <button @click="this.add()">Add</button>
     </div>
+
+    <div name="visualization" style="height: 400px;">
+      <apexchart height="100%" v-if="this.burnDownChartData" type="line" :options="this.burnDownChartData.options" :series="this.burnDownChartData.series"></apexchart>
+    </div>
   </div>
 </template>
 
@@ -51,7 +55,8 @@ export default defineComponent({
       uninvolvedEmployees: [] as Employee[],
       plannedHours: null as number | null,
       newEmployee: null as Employee | null,
-      newHours: null as number | null
+      newHours: null as number | null,
+      burnDownChartData: null as any
     }
   },
   created() {
@@ -62,6 +67,7 @@ export default defineComponent({
       this.project = await getProjectDetails(this.projectId)
       this.departmentEmployees = await getAccountDepartment()
       this.uninvolvedEmployees = this.departmentEmployees
+      this.updateBurnDownChart(this.project)
     },
     async add() {
       if (this.newEmployee != null && this.newHours != null) {
@@ -79,6 +85,67 @@ export default defineComponent({
         return employee.name
       }
       return 'UNKNOWN'
+    },
+    addDays(date: Date, days: number) : Date {
+      var newDate = new Date(date)
+      newDate.setDate(newDate.getDate() + days)
+      return newDate
+    },
+    getWorkingDays(begin: Date, end: Date) { // TODO: Take vacation into account
+      let days = 0
+      begin.setUTCHours(0, 0, 0, 0) // TODO throw if these are no utc days
+      end.setUTCHours(0, 0, 0, 0)
+      let t = begin
+
+      while (t.getTime() <= end.getTime()) {
+        const day = t.getUTCDay()
+        if (day > 0 && day < 6) {
+          days += 1
+        }
+        t = this.addDays(t, 1)
+      }
+      console.log(t)
+      console.log(end)
+      return days
+    },
+    updateBurnDownChart(project: Project) {
+      const today = new Date()
+      today.setUTCHours(0, 0, 0, 0)
+      const projectHours = project.totalPlannings.reduce((sum, plannedHours) => sum + plannedHours.totalHours, 0)
+      const projectBegin = new Date(Date.parse(project.begin))
+      const projectEnd = new Date(Date.parse(project.end))
+      const totalWorkingDays = this.getWorkingDays(projectBegin, projectEnd)
+      const remainingWorkingDays = this.getWorkingDays(today, projectEnd)
+      const remainingQuota = remainingWorkingDays / totalWorkingDays
+      console.log(`today: ${today} passedQuota: ${remainingQuota}`)
+      this.burnDownChartData = {
+        series: [{
+          data: [
+            [today.toString(), Math.round(projectHours * remainingQuota)],
+            [this.project!.end, 0]
+          ]
+        }],
+        options: {
+          chart: {
+            id: 'vuechart-example',
+            redrawOnParentResize: true,
+            toolbar: {
+              show: false
+            }
+          },
+          xaxis: {
+            type: 'datetime',
+            min: today.toString(),
+            tickAmount: 12
+          },
+          tooltip: {
+            enabled: false
+          },
+          zoom: {
+            enabled: false
+          }
+        }
+      }
     }
   }
 })
