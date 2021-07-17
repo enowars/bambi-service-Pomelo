@@ -1,16 +1,17 @@
-export interface Employee {
-  id: number,
-  name: string,
-  department: string,
-  note: string | null
-}
-
 export interface TotalPlanning {
   id: number,
   employeeId: number,
   projectId: number,
   totalHours: number,
   performedHours: number
+}
+
+export interface Employee {
+  id: number,
+  name: string,
+  department: string,
+  note: string | null,
+  totalPlannings: TotalPlanning[]
 }
 
 export interface Project {
@@ -24,6 +25,14 @@ export interface Project {
 export const getAccountInfo = async () : Promise<Employee | null> => {
   try {
     return await (await fetch('/api/account/info')).json() as Employee
+  } catch {
+    return null
+  }
+}
+
+export const getAccountData = async () : Promise<Employee | null> => {
+  try {
+    return await (await fetch('/api/account/data')).json() as Employee
   } catch {
     return null
   }

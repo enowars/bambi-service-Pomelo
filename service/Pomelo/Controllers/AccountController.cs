@@ -107,11 +107,21 @@
 
             var employee = await this.dbContext.Employees
                 .Where(e => e.Id == long.Parse(owner))
-                .Include(e => e.TotalPlannings)
-                .ThenInclude(tp => tp.Project)
-                .Include(e => e.WeeklyCapacities)
-                .Include(e => e.Vacations)
+                .AsNoTracking()
                 .SingleAsync(this.HttpContext.RequestAborted);
+
+            var plannings = await this.dbContext.TotalPlannings
+                .Where(tp => tp.EmployeeId == employee.Id)
+                .AsNoTracking()
+                .ToListAsync(this.HttpContext.RequestAborted);
+
+            var capacities = await this.dbContext.WeeklyCapacities
+                .Where(wc => wc.EmployeeId == employee.Id)
+                .AsNoTracking()
+                .ToListAsync(this.HttpContext.RequestAborted);
+
+            employee.TotalPlannings = plannings;
+            employee.WeeklyCapacities = capacities;
 
             return this.Json(employee);
         }

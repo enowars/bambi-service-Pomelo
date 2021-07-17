@@ -14,7 +14,7 @@
       </thead>
       <tbody>
         <tr v-for="hours in this.project.totalPlannings" :key="hours.id">
-          <td>{{getName(hours.employeeId) }}</td>
+          <td>{{ getName(hours.employeeId) }}</td>
           <td>{{ hours.totalHours }}</td>
           <td>{{ hours.performedHours }}</td>
           <td>0</td>
@@ -131,6 +131,12 @@ export default defineComponent({
             redrawOnParentResize: true,
             toolbar: {
               show: false
+            },
+            zoom: {
+              enabled: false
+            },
+            animations: {
+              enabled: false
             }
           },
           xaxis: {
@@ -139,9 +145,6 @@ export default defineComponent({
             tickAmount: 12
           },
           tooltip: {
-            enabled: false
-          },
-          zoom: {
             enabled: false
           }
         }
