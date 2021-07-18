@@ -13,8 +13,9 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="hours in this.project.totalPlannings" :key="hours.id">
-          <td>{{ getName(hours.employeeId) }}</td>
+        <tr v-for="hours in this.project.plannedHours" :key="hours.id">
+          <!--<td><router-link :to="{name: 'User', params: { employeeId: hours.employeeId }}">{{ getName(hours.employeeId) }}</router-link></td>-->
+          <td><router-link :to="{name: 'EmployeePage', params: { employeeId: hours.employeeId }}">{{ this.getName(hours.employeeId) }}</router-link></td>
           <td>{{ hours.totalHours }}</td>
           <td>{{ hours.performedHours }}</td>
           <td>0</td>
@@ -111,9 +112,9 @@ export default defineComponent({
     updateBurnDownChart(project: Project) {
       const today = new Date()
       today.setUTCHours(0, 0, 0, 0)
-      const projectHours = project.totalPlannings.reduce((sum, plannedHours) => sum + plannedHours.totalHours, 0)
-      const projectBegin = new Date(Date.parse(project.begin))
-      const projectEnd = new Date(Date.parse(project.end))
+      const projectHours = project.plannedHours.reduce((sum, plannedHours) => sum + plannedHours.totalHours, 0)
+      const projectBegin = new Date(Date.parse(project.begin + 'Z'))
+      const projectEnd = new Date(Date.parse(project.end + 'Z'))
       const totalWorkingDays = this.getWorkingDays(projectBegin, projectEnd)
       const remainingWorkingDays = this.getWorkingDays(today, projectEnd)
       const remainingQuota = remainingWorkingDays / totalWorkingDays

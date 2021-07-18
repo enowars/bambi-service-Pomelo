@@ -16,11 +16,9 @@
 
         public string? Note { get; set; }
 
-        public List<TotalPlanning> TotalPlannings { get; set; }
+        public List<PlannedHours> PlannedHours { get; set; }
 
-        public List<WeeklyCapacity> WeeklyCapacities { get; set; }
-
-        public List<Vacation> Vacations { get; set; }
+        public List<WeeklyProjectCapacity> WeeklyProjectCapacities { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     }
 }

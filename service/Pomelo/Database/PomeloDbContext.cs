@@ -19,11 +19,9 @@
 
         public DbSet<Project> Projects { get; set; }
 
-        public DbSet<WeeklyCapacity> WeeklyCapacities { get; set; }
+        public DbSet<WeeklyProjectCapacity> WeeklyProjectCapacities { get; set; }
 
-        public DbSet<TotalPlanning> TotalPlannings { get; set; }
-
-        public DbSet<Vacation> Vacations { get; set; }
+        public DbSet<PlannedHours> PlannedHours { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     }
 }

@@ -110,61 +110,20 @@
                 .AsNoTracking()
                 .SingleAsync(this.HttpContext.RequestAborted);
 
-            var plannings = await this.dbContext.TotalPlannings
+            var plannings = await this.dbContext.PlannedHours
                 .Where(tp => tp.EmployeeId == employee.Id)
                 .AsNoTracking()
                 .ToListAsync(this.HttpContext.RequestAborted);
 
-            var capacities = await this.dbContext.WeeklyCapacities
+            var capacities = await this.dbContext.WeeklyProjectCapacities
                 .Where(wc => wc.EmployeeId == employee.Id)
                 .AsNoTracking()
                 .ToListAsync(this.HttpContext.RequestAborted);
 
-            employee.TotalPlannings = plannings;
-            employee.WeeklyCapacities = capacities;
+            employee.PlannedHours = plannings;
+            employee.WeeklyProjectCapacities = capacities;
 
             return this.Json(employee);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Vacation(long calendarWeek, long days)
-        {
-            var owner = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (owner == null)
-            {
-                return this.Forbid();
-            }
-
-            this.dbContext.Vacations.Add(new Vacation()
-            {
-                AbsentDays = days,
-                CalendarWeek = calendarWeek,
-                EmployeeId = long.Parse(owner),
-            });
-
-            await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
-
-            return this.NoContent();
-        }
-
-        [HttpDelete]
-        public async Task<IActionResult> Vacation(long id)
-        {
-            this.logger.LogInformation($"DELETE Vacation({id})");
-            var owner = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (owner == null)
-            {
-                return this.Forbid();
-            }
-
-            var vac = await this.dbContext.Vacations
-                .Where(v => v.Id == id)
-                .Where(v => v.EmployeeId == long.Parse(owner))
-                .SingleAsync(this.HttpContext.RequestAborted);
-            this.dbContext.Vacations.Remove(vac);
-            await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
-
-            return this.NoContent();
         }
 
         [HttpGet]
@@ -186,6 +145,43 @@
                 .ToArrayAsync(this.HttpContext.RequestAborted);
 
             return this.Json(department);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UserData(long employeeId)
+        {
+            var user = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (user == null)
+            {
+                return this.Forbid();
+            }
+
+            var dbUser = await this.dbContext.Employees
+                .Where(e => e.Id == long.Parse(user))
+                .AsNoTracking()
+                .SingleAsync(this.HttpContext.RequestAborted);
+
+            var employee = await this.dbContext.Employees
+                .Where(e => e.Id == employeeId)
+                .AsNoTracking()
+                .SingleAsync(this.HttpContext.RequestAborted);
+
+            if (dbUser.Department != employee.Department)
+            {
+                return this.Forbid();
+            }
+
+            employee.PlannedHours = await this.dbContext.PlannedHours
+                .Where(tp => tp.EmployeeId == dbUser.Id)
+                .AsNoTracking()
+                .ToListAsync(this.HttpContext.RequestAborted);
+
+            employee.WeeklyProjectCapacities = await this.dbContext.WeeklyProjectCapacities
+                .Where(wc => wc.EmployeeId == dbUser.Id)
+                .AsNoTracking()
+                .ToListAsync(this.HttpContext.RequestAborted);
+
+            return this.Json(employee);
         }
     }
 }

@@ -39,7 +39,7 @@
                 var split = line.Split(',');
                 var employeeId = long.Parse(split[0]);
                 var hours = long.Parse(split[0]);
-                var totalPlanning = await this.dbContext.TotalPlannings
+                var totalPlanning = await this.dbContext.PlannedHours
                     .Where(tp => tp.ProjectId == projectId)
                     .Where(tp => tp.EmployeeId == employeeId)
                     .SingleAsync(this.HttpContext.RequestAborted);
@@ -49,14 +49,14 @@
                 }
                 else
                 {
-                    totalPlanning = new TotalPlanning()
+                    totalPlanning = new PlannedHours()
                     {
                         ProjectId = projectId,
                         EmployeeId = employeeId,
                         PerformedHours = hours,
                         TotalHours = 0,
                     };
-                    this.dbContext.TotalPlannings.Add(totalPlanning);
+                    this.dbContext.PlannedHours.Add(totalPlanning);
                 }
             }
 

@@ -16,8 +16,8 @@ const routes: Array<RouteRecordRaw> = [
     component: Project
   },
   {
-    path: '/user',
-    name: 'Personal Page',
+    path: '/employee/:employeeId',
+    name: 'EmployeePage',
     component: User
   },
   {

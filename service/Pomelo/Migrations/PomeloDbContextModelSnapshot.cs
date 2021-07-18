@@ -38,6 +38,33 @@ namespace Pomelo.Migrations
                     b.ToTable("Employees");
                 });
 
+            modelBuilder.Entity("Pomelo.Models.PlannedHours", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("EmployeeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("PerformedHours")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("ProjectId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TotalHours")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("PlannedHours");
+                });
+
             modelBuilder.Entity("Pomelo.Models.Project", b =>
                 {
                     b.Property<long>("Id")
@@ -68,62 +95,10 @@ namespace Pomelo.Migrations
                     b.ToTable("Projects");
                 });
 
-            modelBuilder.Entity("Pomelo.Models.TotalPlanning", b =>
+            modelBuilder.Entity("Pomelo.Models.WeeklyProjectCapacity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("EmployeeId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("PerformedHours")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("ProjectId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("TotalHours")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("TotalPlannings");
-                });
-
-            modelBuilder.Entity("Pomelo.Models.Vacation", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("AbsentDays")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("CalendarWeek")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("EmployeeId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.ToTable("Vacations");
-                });
-
-            modelBuilder.Entity("Pomelo.Models.WeeklyCapacity", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("CalendarWeek")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("EmployeeId")
@@ -135,13 +110,35 @@ namespace Pomelo.Migrations
                     b.Property<long>("ProjectId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EmployeeId");
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("WeeklyCapacities");
+                    b.ToTable("WeeklyProjectCapacities");
+                });
+
+            modelBuilder.Entity("Pomelo.Models.PlannedHours", b =>
+                {
+                    b.HasOne("Pomelo.Models.Employee", "Employee")
+                        .WithMany("PlannedHours")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Pomelo.Models.Project", "Project")
+                        .WithMany("PlannedHours")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("Pomelo.Models.Project", b =>
@@ -155,46 +152,16 @@ namespace Pomelo.Migrations
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Pomelo.Models.TotalPlanning", b =>
+            modelBuilder.Entity("Pomelo.Models.WeeklyProjectCapacity", b =>
                 {
                     b.HasOne("Pomelo.Models.Employee", "Employee")
-                        .WithMany("TotalPlannings")
+                        .WithMany("WeeklyProjectCapacities")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Pomelo.Models.Project", "Project")
-                        .WithMany("TotalPlannings")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-
-                    b.Navigation("Project");
-                });
-
-            modelBuilder.Entity("Pomelo.Models.Vacation", b =>
-                {
-                    b.HasOne("Pomelo.Models.Employee", "Employee")
-                        .WithMany("Vacations")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-                });
-
-            modelBuilder.Entity("Pomelo.Models.WeeklyCapacity", b =>
-                {
-                    b.HasOne("Pomelo.Models.Employee", "Employee")
-                        .WithMany("WeeklyCapacities")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Pomelo.Models.Project", "Project")
-                        .WithMany("WeeklyCapacities")
+                        .WithMany("WeeklyProjectCapacities")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -206,18 +173,16 @@ namespace Pomelo.Migrations
 
             modelBuilder.Entity("Pomelo.Models.Employee", b =>
                 {
-                    b.Navigation("TotalPlannings");
+                    b.Navigation("PlannedHours");
 
-                    b.Navigation("Vacations");
-
-                    b.Navigation("WeeklyCapacities");
+                    b.Navigation("WeeklyProjectCapacities");
                 });
 
             modelBuilder.Entity("Pomelo.Models.Project", b =>
                 {
-                    b.Navigation("TotalPlannings");
+                    b.Navigation("PlannedHours");
 
-                    b.Navigation("WeeklyCapacities");
+                    b.Navigation("WeeklyProjectCapacities");
                 });
 #pragma warning restore 612, 618
         }

@@ -47,28 +47,7 @@ namespace Pomelo.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Vacations",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    EmployeeId = table.Column<long>(type: "INTEGER", nullable: false),
-                    CalendarWeek = table.Column<long>(type: "INTEGER", nullable: false),
-                    AbsentDays = table.Column<long>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Vacations", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Vacations_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TotalPlannings",
+                name: "PlannedHours",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
@@ -80,15 +59,15 @@ namespace Pomelo.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TotalPlannings", x => x.Id);
+                    table.PrimaryKey("PK_PlannedHours", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TotalPlannings_Employees_EmployeeId",
+                        name: "FK_PlannedHours_Employees_EmployeeId",
                         column: x => x.EmployeeId,
                         principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TotalPlannings_Projects_ProjectId",
+                        name: "FK_PlannedHours_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
@@ -96,27 +75,27 @@ namespace Pomelo.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "WeeklyCapacities",
+                name: "WeeklyProjectCapacities",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     EmployeeId = table.Column<long>(type: "INTEGER", nullable: false),
                     ProjectId = table.Column<long>(type: "INTEGER", nullable: false),
-                    CalendarWeek = table.Column<long>(type: "INTEGER", nullable: false),
+                    Start = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Hours = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WeeklyCapacities", x => x.Id);
+                    table.PrimaryKey("PK_WeeklyProjectCapacities", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_WeeklyCapacities_Employees_EmployeeId",
+                        name: "FK_WeeklyProjectCapacities_Employees_EmployeeId",
                         column: x => x.EmployeeId,
                         principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_WeeklyCapacities_Projects_ProjectId",
+                        name: "FK_WeeklyProjectCapacities_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
@@ -124,46 +103,38 @@ namespace Pomelo.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlannedHours_EmployeeId",
+                table: "PlannedHours",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlannedHours_ProjectId",
+                table: "PlannedHours",
+                column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Projects_OwnerId",
                 table: "Projects",
                 column: "OwnerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TotalPlannings_EmployeeId",
-                table: "TotalPlannings",
+                name: "IX_WeeklyProjectCapacities_EmployeeId",
+                table: "WeeklyProjectCapacities",
                 column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TotalPlannings_ProjectId",
-                table: "TotalPlannings",
-                column: "ProjectId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Vacations_EmployeeId",
-                table: "Vacations",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_WeeklyCapacities_EmployeeId",
-                table: "WeeklyCapacities",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_WeeklyCapacities_ProjectId",
-                table: "WeeklyCapacities",
+                name: "IX_WeeklyProjectCapacities_ProjectId",
+                table: "WeeklyProjectCapacities",
                 column: "ProjectId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "TotalPlannings");
+                name: "PlannedHours");
 
             migrationBuilder.DropTable(
-                name: "Vacations");
-
-            migrationBuilder.DropTable(
-                name: "WeeklyCapacities");
+                name: "WeeklyProjectCapacities");
 
             migrationBuilder.DropTable(
                 name: "Projects");

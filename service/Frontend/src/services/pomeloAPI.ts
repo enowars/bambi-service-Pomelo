@@ -1,4 +1,4 @@
-export interface TotalPlanning {
+export interface PlannedHours {
   id: number,
   employeeId: number,
   projectId: number,
@@ -6,12 +6,21 @@ export interface TotalPlanning {
   performedHours: number
 }
 
+export interface WeeklyProjectCapacity {
+  id: number,
+  employeeId: number,
+  projectId: number,
+  start: string,
+  hours: number
+}
+
 export interface Employee {
   id: number,
   name: string,
   department: string,
   note: string | null,
-  totalPlannings: TotalPlanning[]
+  plannedHours: PlannedHours[],
+  weeklyProjectCapacities: WeeklyProjectCapacity[]
 }
 
 export interface Project {
@@ -19,7 +28,7 @@ export interface Project {
   name: string,
   begin: string,
   end: string,
-  totalPlannings: TotalPlanning[]
+  plannedHours: PlannedHours[]
 }
 
 export const getAccountInfo = async () : Promise<Employee | null> => {
@@ -81,7 +90,7 @@ export const getAccountDepartment = async () : Promise<Employee[]> => {
   }).then(val => val.json()) as Employee[]
 }
 
-export const postProjectTotalPlanning = async (employeeId: number, projectId: number, hours: number) : Promise<TotalPlanning | null> => {
+export const postProjectTotalPlanning = async (employeeId: number, projectId: number, hours: number) : Promise<PlannedHours | null> => {
   console.log(employeeId)
   console.log(projectId)
   console.log(hours)
@@ -93,8 +102,30 @@ export const postProjectTotalPlanning = async (employeeId: number, projectId: nu
     return await fetch('/api/project/totalplanning', {
       method: 'POST',
       body: form
-    }).then(val => val.json()) as TotalPlanning
+    }).then(val => val.json()) as PlannedHours
   } catch {
     return null
+  }
+}
+
+export const getAccountUserData = async (employeeId: number) : Promise<Employee> => {
+  return await fetch('/api/account/userdata?employeeId=' + employeeId, {
+    method: 'GET'
+  }).then(val => val.json()) as Employee
+}
+
+export const postWeeklyProjectCapacity = async (employeeId: number, projectId: number, start: string, capacity: number) : Promise<void> => {
+  const form = new FormData()
+  form.append('employeeId', employeeId.toString())
+  form.append('projectId', projectId.toString())
+  form.append('start', start)
+  form.append('capacity', capacity.toString())
+  try {
+    await fetch('/api/project/weeklyprojectcapacity', {
+      method: 'POST',
+      body: form
+    })
+  } catch {
+    console.log('postWeeklyProjectCapacity failed')
   }
 }
