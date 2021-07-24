@@ -28,7 +28,8 @@ export interface Project {
   name: string,
   begin: string,
   end: string,
-  plannedHours: PlannedHours[]
+  plannedHours: PlannedHours[],
+  weeklyProjectCapacities: WeeklyProjectCapacity[]
 }
 
 export const getAccountInfo = async () : Promise<Employee | null> => {

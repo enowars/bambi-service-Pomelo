@@ -118,14 +118,45 @@ export default defineComponent({
       const totalWorkingDays = this.getWorkingDays(projectBegin, projectEnd)
       const remainingWorkingDays = this.getWorkingDays(today, projectEnd)
       const remainingQuota = remainingWorkingDays / totalWorkingDays
+      const allocatedHours = []
+
+      var weekBegin = new Date()
+      weekBegin.setUTCHours(0, 0, 0, 0)
+      weekBegin.setUTCDate(1)
+
+      // TODO start with done hours
+      var projectAllocatedHours = 0
+      for (var i = 0; i < 12; i++) {
+        console.log(`pushing week ${weekBegin}`)
+        allocatedHours.push([
+          weekBegin.toString(),
+          projectHours - projectAllocatedHours
+        ])
+        var diff = project.weeklyProjectCapacities
+          .filter(wpc => new Date(Date.parse(wpc.start + 'Z')).getTime() === weekBegin.getTime())
+          .reduce((sum, wpc) => sum + wpc.hours, 0)
+        console.log(`diff=${diff} i=${i}`)
+        weekBegin = this.addDays(weekBegin, 7)
+        projectAllocatedHours += diff
+      }
+      console.log(allocatedHours)
+
       console.log(`today: ${today} passedQuota: ${remainingQuota}`)
+      console.log(`project end: ${project!.end}`)
       this.burnDownChartData = {
-        series: [{
-          data: [
-            [today.toString(), Math.round(projectHours * remainingQuota)],
-            [this.project!.end, 0]
-          ]
-        }],
+        series: [
+          {
+            name: 'Planned Hours',
+            data: [
+              [today.toString(), Math.round(projectHours * remainingQuota)],
+              [project!.end, 0]
+            ]
+          },
+          {
+            name: 'Allocated Hours',
+            data: allocatedHours
+          }
+        ],
         options: {
           chart: {
             id: 'vuechart-example',
@@ -146,7 +177,7 @@ export default defineComponent({
             tickAmount: 12
           },
           tooltip: {
-            enabled: false
+            enabled: true
           }
         }
       }

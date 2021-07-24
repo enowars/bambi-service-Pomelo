@@ -18,8 +18,10 @@
           <td>0</td>
           <td>{{ week.begin }}</td>
           <td>0</td>
-          <td v-for="weeklyProjectCapacity in week.capacities" :key="weeklyProjectCapacity.projectId" contenteditable @input="event => onInput(event, weeklyProjectCapacity.projectId, weeklyProjectCapacity.start)">
-            <div contenteditable="true">{{ weeklyProjectCapacity.hours }}</div>
+          <td v-for="weeklyProjectCapacity in week.capacities" :key="weeklyProjectCapacity.projectId" v-on:change="onInput(weeklyProjectCapacity)">
+            <!-- @input="event => onInput(event, weeklyProjectCapacity.projectId, weeklyProjectCapacity.start)" -->
+            <!-- <div contenteditable="true">{{ weeklyProjectCapacity.hours }}</div> -->
+            <input type="number" v-model="weeklyProjectCapacity.hours">
           </td>
         </tr>
       </tbody>
@@ -52,10 +54,8 @@ export default defineComponent({
     this.init()
   },
   methods: {
-    async onInput(event: any, projectId: number, start: string) {
-      console.log('onInput')
-      console.log(event)
-      await postWeeklyProjectCapacity(this.employeeId, projectId, start, event.data)
+    async onInput(capacity: WeeklyProjectCapacity) {
+      await postWeeklyProjectCapacity(this.employeeId, capacity.projectId, capacity.start, capacity.hours)
     },
     async init() {
       this.employee = await getAccountUserData(this.employeeId)
