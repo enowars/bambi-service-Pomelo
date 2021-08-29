@@ -136,11 +136,10 @@ export default defineComponent({
       }
       // console.log(plannedHours)
       // console.log(`today: ${today} passedQuota: ${remainingQuota}`)
-      console.log(`project end: ${project!.end}`)
       this.burnDownChartData = {
         series: [
           {
-            name: 'Linear Hours',
+            name: 'Theoretical Hours',
             data: [
               [today.toString(), Math.round(totalProjectHours * remainingQuota)],
               [project!.end, 0]
@@ -172,6 +171,9 @@ export default defineComponent({
           },
           tooltip: {
             enabled: true
+          },
+          markers: {
+            size: 5
           }
         }
       }
