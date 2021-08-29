@@ -8,8 +8,8 @@
           <td>Cal. Week</td>
           <td>Begin</td>
           <td>Reserve</td>
-          <td v-for="plannedHours in this.employee.plannedHours" :key="plannedHours.id">
-            {{ this.getProjectName(plannedHours.projectId) }}
+          <td v-for="employeeProjectHours in this.employee.employeeProjectHours" :key="employeeProjectHours.id">
+            {{ this.getProjectName(employeeProjectHours.projectId) }}
           </td>
         </tr>
       </thead>
@@ -31,6 +31,7 @@
 
 <script lang="ts">
 import { Employee, getAccountData, getAccountInfo, getAccountUserData, getProjectDepartmentProjects, postWeeklyProjectCapacity, Project, EmployeeProjectWeeklyCapacity } from '@/services/pomeloAPI'
+import { getLastMonday } from '@/util'
 import { defineComponent, inject } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -59,9 +60,14 @@ export default defineComponent({
     },
     async init() {
       this.employee = await getAccountUserData(this.employeeId)
+      this.projects = await getProjectDepartmentProjects()
       var begin = new Date()
       begin.setUTCHours(0, 0, 0, 0)
-      begin.setDate(1)
+      begin = getLastMonday(begin)
+      console.log('###')
+      console.log(begin)
+      console.log(begin.toUTCString())
+
       for (var i = 0; i < 12; i++) {
         // build a week
         var week = {
@@ -70,8 +76,8 @@ export default defineComponent({
           reserve: 0,
           capacities: []
         } as Week
-        for (var p in this.employee.plannedHours) {
-          const plannedHours = this.employee.plannedHours[p]
+        for (var p in this.employee.employeeProjectHours) {
+          const plannedHours = this.employee.employeeProjectHours[p]
           console.log('handling project ' + plannedHours.projectId)
           const upstreamCapacity = this.employee.employeeProjectWeeklyCapacities
             .find(wpc => wpc.projectId === plannedHours.projectId && new Date(Date.parse(wpc.start + 'Z')).getTime() === begin.getTime())
@@ -87,10 +93,10 @@ export default defineComponent({
             } as EmployeeProjectWeeklyCapacity)
           }
         }
-        console.log(week)
         this.weeks.push(week)
         begin = this.addDays(begin, 7)
       }
+      console.log(this.weeks)
     },
     addDays(date: Date, days: number) : Date {
       var newDate = new Date(date)
@@ -101,6 +107,8 @@ export default defineComponent({
       const project = this.projects.find(p => p.id === projectId)
       if (project) {
         return project.name
+      } else {
+        console.log(project)
       }
       return 'UNKNOWN'
     }

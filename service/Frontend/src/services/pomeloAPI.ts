@@ -19,7 +19,7 @@ export interface Employee {
   name: string,
   department: string,
   note: string | null,
-  plannedHours: EmployeeProjectHours[],
+  employeeProjectHours: EmployeeProjectHours[],
   employeeProjectWeeklyCapacities: EmployeeProjectWeeklyCapacity[]
 }
 

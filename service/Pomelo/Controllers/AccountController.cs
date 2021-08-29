@@ -112,6 +112,7 @@
 
             var plannings = await this.dbContext.EmployeeProjectHours
                 .Where(tp => tp.EmployeeId == employee.Id)
+                .Include(e => e.Project)
                 .AsNoTracking()
                 .ToListAsync(this.HttpContext.RequestAborted);
 

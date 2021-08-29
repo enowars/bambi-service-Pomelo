@@ -131,18 +131,20 @@ export default defineComponent({
       weekBegin.setUTCHours(0, 0, 0, 0)
 
       var projectAllocatedHours = deliveredProjectHours
-      for (var i = 0; i < 4; i++) {
+      for (var i = 0; i < 12; i++) {
         console.log(`handling week ${weekBegin}`)
         allocatedHours.push([
           weekBegin.toString(),
-          totalProjectHours - projectAllocatedHours
+          projectAllocatedHours
         ])
-        var diff = project.employeeProjectWeeklyCapacities
-          .filter(wpc => new Date(Date.parse(wpc.start + 'Z')).getTime() === weekBegin.getTime())
-          .reduce((sum, wpc) => sum + wpc.capacity, 0)
-        // console.log(`diff=${diff} i=${i}`)
+        var pwc = project.employeeProjectWeeklyCapacities
+          .filter(wpc => new Date(Date.parse(wpc.start + 'Z')).getTime() === weekBegin.getTime())[0]
+
+        if (!pwc) {
+          throw Error('möp')
+        }
         weekBegin = this.addDays(weekBegin, 7)
-        projectAllocatedHours += diff
+        projectAllocatedHours -= (pwc.capacity / 100) * 40
       }
       // console.log(allocatedHours)
       // console.log(`today: ${today} passedQuota: ${remainingQuota}`)
