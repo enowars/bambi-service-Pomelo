@@ -11,7 +11,7 @@
     {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public PomeloDbContext(DbContextOptions<PomeloDbContext> contextOptions)
-    : base(contextOptions)
+            : base(contextOptions)
         {
         }
 
@@ -19,9 +19,9 @@
 
         public DbSet<Project> Projects { get; set; }
 
-        public DbSet<WeeklyProjectCapacity> WeeklyProjectCapacities { get; set; }
+        public DbSet<EmployeeProjectWeeklyCapacity> EmployeeProjectWeeklyCapacities { get; set; }
 
-        public DbSet<PlannedHours> PlannedHours { get; set; }
+        public DbSet<EmployeeProjectHours> EmployeeProjectHours { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     }
 }

@@ -6,18 +6,18 @@
       <thead>
         <tr>
           <td>Name</td>
-          <td>Planned Hours</td>
+          <td>Total Hours</td>
           <td>Performed Hours</td>
           <td>Absolute Deviation</td>
           <td>Relative Deviation</td>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="hours in this.project.plannedHours" :key="hours.id">
+        <tr v-for="hours in this.project.employeeProjectHours" :key="hours.id">
           <!--<td><router-link :to="{name: 'User', params: { employeeId: hours.employeeId }}">{{ getName(hours.employeeId) }}</router-link></td>-->
           <td><router-link :to="{name: 'EmployeePage', params: { employeeId: hours.employeeId }}">{{ this.getName(hours.employeeId) }}</router-link></td>
           <td>{{ hours.totalHours }}</td>
-          <td>{{ hours.performedHours }}</td>
+          <td>{{ hours.deliveredHours }}</td>
           <td>0</td>
           <td>0</td>
         </tr>
@@ -31,7 +31,7 @@
           {{ uninvolvedEmployee.name }}
         </option>
       </select>
-      <input type="number" v-model="newHours" placeholder="planned hours">
+      <input type="number" v-model="newHours" placeholder="total hours">
       <button @click="this.add()">Add</button>
     </div>
 
@@ -110,9 +110,11 @@ export default defineComponent({
       return days
     },
     updateBurnDownChart(project: Project) {
+      // The burndown chart starts at the last booking.
+      // Bookings may happen at any time, so the begun week needs special handling.
       const today = new Date()
       today.setUTCHours(0, 0, 0, 0)
-      const projectHours = project.plannedHours.reduce((sum, plannedHours) => sum + plannedHours.totalHours, 0)
+      const projectHours = project.employeeProjectHours.reduce((sum, plannedHours) => sum + plannedHours.totalHours, 0)
       const projectBegin = new Date(Date.parse(project.begin + 'Z'))
       const projectEnd = new Date(Date.parse(project.end + 'Z'))
       const totalWorkingDays = this.getWorkingDays(projectBegin, projectEnd)
@@ -127,26 +129,25 @@ export default defineComponent({
       // TODO start with done hours
       var projectAllocatedHours = 0
       for (var i = 0; i < 12; i++) {
-        console.log(`pushing week ${weekBegin}`)
+        // console.log(`pushing week ${weekBegin}`)
         allocatedHours.push([
           weekBegin.toString(),
           projectHours - projectAllocatedHours
         ])
-        var diff = project.weeklyProjectCapacities
+        var diff = project.employeeProjectWeeklyCapacities
           .filter(wpc => new Date(Date.parse(wpc.start + 'Z')).getTime() === weekBegin.getTime())
-          .reduce((sum, wpc) => sum + wpc.hours, 0)
-        console.log(`diff=${diff} i=${i}`)
+          .reduce((sum, wpc) => sum + wpc.capacity, 0)
+        // console.log(`diff=${diff} i=${i}`)
         weekBegin = this.addDays(weekBegin, 7)
         projectAllocatedHours += diff
       }
-      console.log(allocatedHours)
-
-      console.log(`today: ${today} passedQuota: ${remainingQuota}`)
-      console.log(`project end: ${project!.end}`)
+      // console.log(allocatedHours)
+      // console.log(`today: ${today} passedQuota: ${remainingQuota}`)
+      // console.log(`project end: ${project!.end}`)
       this.burnDownChartData = {
         series: [
           {
-            name: 'Planned Hours',
+            name: 'Total Hours',
             data: [
               [today.toString(), Math.round(projectHours * remainingQuota)],
               [project!.end, 0]
@@ -181,6 +182,7 @@ export default defineComponent({
           }
         }
       }
+      console.log(this.burnDownChartData)
     }
   }
 })

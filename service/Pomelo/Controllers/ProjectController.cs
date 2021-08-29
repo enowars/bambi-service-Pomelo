@@ -66,18 +66,18 @@
                 return this.Forbid();
             }
 
-            var plannings = await this.dbContext.PlannedHours
+            var plannings = await this.dbContext.EmployeeProjectHours
                 .Where(tp => tp.ProjectId == projectId)
                 .AsNoTracking()
                 .ToListAsync(this.HttpContext.RequestAborted);
 
-            var capacities = await this.dbContext.WeeklyProjectCapacities
+            var capacities = await this.dbContext.EmployeeProjectWeeklyCapacities
                 .Where(wc => wc.ProjectId == projectId)
                 .AsNoTracking()
                 .ToListAsync(this.HttpContext.RequestAborted);
 
-            project.PlannedHours = plannings;
-            project.WeeklyProjectCapacities = capacities;
+            project.EmployeeProjectHours = plannings;
+            project.EmployeeProjectWeeklyCapacities = capacities;
 
             return this.Json(project);
         }
@@ -110,7 +110,7 @@
         [HttpPost]
         public async Task<IActionResult> TotalPlanning([FromForm] long employeeId, [FromForm] long projectId, [FromForm] long hours)
         {
-            PlannedHours? totalPlanning = await this.dbContext.PlannedHours
+            EmployeeProjectHours? totalPlanning = await this.dbContext.EmployeeProjectHours
                 .Where(tp => tp.EmployeeId == employeeId)
                 .Where(tp => tp.ProjectId == projectId)
                 .SingleOrDefaultAsync(this.HttpContext.RequestAborted);
@@ -120,14 +120,14 @@
             }
             else
             {
-                totalPlanning = new PlannedHours()
+                totalPlanning = new EmployeeProjectHours()
                 {
                     EmployeeId = employeeId,
                     ProjectId = projectId,
                     TotalHours = hours,
-                    PerformedHours = 0,
+                    DeliveredHours = 0,
                 };
-                this.dbContext.PlannedHours.Add(totalPlanning);
+                this.dbContext.EmployeeProjectHours.Add(totalPlanning);
             }
 
             await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
@@ -137,7 +137,7 @@
         [HttpPost]
         public async Task WeeklyProjectCapacity([FromForm] long employeeId, [FromForm] long projectId, [FromForm] DateTime start, [FromForm] long capacity)
         {
-            WeeklyProjectCapacity? weeklyProjectCapacity = await this.dbContext.WeeklyProjectCapacities
+            EmployeeProjectWeeklyCapacity? weeklyProjectCapacity = await this.dbContext.EmployeeProjectWeeklyCapacities
                 .Where(wpc => wpc.ProjectId == projectId)
                 .Where(wpc => wpc.EmployeeId == employeeId)
                 .Where(wpc => wpc.Start == start)
@@ -146,18 +146,18 @@
             Console.WriteLine($"{employeeId} {projectId} {start} {capacity}");
             if (weeklyProjectCapacity != null)
             {
-                weeklyProjectCapacity.Hours = capacity;
+                weeklyProjectCapacity.Capacity = capacity;
             }
             else
             {
-                weeklyProjectCapacity = new WeeklyProjectCapacity()
+                weeklyProjectCapacity = new EmployeeProjectWeeklyCapacity()
                 {
                     EmployeeId = employeeId,
                     ProjectId = projectId,
                     Start = start,
-                    Hours = capacity,
+                    Capacity = capacity,
                 };
-                this.dbContext.WeeklyProjectCapacities.Add(weeklyProjectCapacity);
+                this.dbContext.EmployeeProjectWeeklyCapacities.Add(weeklyProjectCapacity);
             }
 
             await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);

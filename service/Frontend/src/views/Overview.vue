@@ -23,6 +23,8 @@
     </table>
   </div>
   <input v-model="projectName" placeholder="projectName">
+  <input v-model="startDate" type="date">
+  <input v-model="endDate" type="date">
   <button @click="this.createProject()">Create Project</button>
 </template>
 
@@ -38,13 +40,15 @@ export default defineComponent({
   data() {
     return {
       projectName: null as string | null,
-      projects: [] as Project[]
+      projects: [] as Project[],
+      startDate: null as Date | null,
+      endDate: null as Date | null
     }
   },
   methods: {
     async createProject() {
-      if (this.projectName !== null) {
-        await postProjectCreate(this.projectName, new Date(), new Date())
+      if (this.projectName !== null && this.startDate !== null && this.endDate !== null) {
+        await postProjectCreate(this.projectName, this.startDate, this.endDate)
         await this.init()
       }
     },

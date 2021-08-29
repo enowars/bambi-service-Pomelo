@@ -110,18 +110,18 @@
                 .AsNoTracking()
                 .SingleAsync(this.HttpContext.RequestAborted);
 
-            var plannings = await this.dbContext.PlannedHours
+            var plannings = await this.dbContext.EmployeeProjectHours
                 .Where(tp => tp.EmployeeId == employee.Id)
                 .AsNoTracking()
                 .ToListAsync(this.HttpContext.RequestAborted);
 
-            var capacities = await this.dbContext.WeeklyProjectCapacities
+            var capacities = await this.dbContext.EmployeeProjectWeeklyCapacities
                 .Where(wc => wc.EmployeeId == employee.Id)
                 .AsNoTracking()
                 .ToListAsync(this.HttpContext.RequestAborted);
 
-            employee.PlannedHours = plannings;
-            employee.WeeklyProjectCapacities = capacities;
+            employee.EmployeeProjectHours = plannings;
+            employee.EmployeeProjectWeeklyCapacities = capacities;
 
             return this.Json(employee);
         }
@@ -171,12 +171,12 @@
                 return this.Forbid();
             }
 
-            employee.PlannedHours = await this.dbContext.PlannedHours
+            employee.EmployeeProjectHours = await this.dbContext.EmployeeProjectHours
                 .Where(tp => tp.EmployeeId == dbUser.Id)
                 .AsNoTracking()
                 .ToListAsync(this.HttpContext.RequestAborted);
 
-            employee.WeeklyProjectCapacities = await this.dbContext.WeeklyProjectCapacities
+            employee.EmployeeProjectWeeklyCapacities = await this.dbContext.EmployeeProjectWeeklyCapacities
                 .Where(wc => wc.EmployeeId == dbUser.Id)
                 .AsNoTracking()
                 .ToListAsync(this.HttpContext.RequestAborted);

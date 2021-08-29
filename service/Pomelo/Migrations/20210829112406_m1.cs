@@ -47,7 +47,7 @@ namespace Pomelo.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlannedHours",
+                name: "EmployeeProjectHours",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
@@ -55,19 +55,20 @@ namespace Pomelo.Migrations
                     EmployeeId = table.Column<long>(type: "INTEGER", nullable: false),
                     ProjectId = table.Column<long>(type: "INTEGER", nullable: false),
                     TotalHours = table.Column<long>(type: "INTEGER", nullable: false),
-                    PerformedHours = table.Column<long>(type: "INTEGER", nullable: false)
+                    DeliveredHours = table.Column<long>(type: "INTEGER", nullable: false),
+                    DeliveredHoursTimestamp = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlannedHours", x => x.Id);
+                    table.PrimaryKey("PK_EmployeeProjectHours", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlannedHours_Employees_EmployeeId",
+                        name: "FK_EmployeeProjectHours_Employees_EmployeeId",
                         column: x => x.EmployeeId,
                         principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlannedHours_Projects_ProjectId",
+                        name: "FK_EmployeeProjectHours_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
@@ -75,7 +76,7 @@ namespace Pomelo.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "WeeklyProjectCapacities",
+                name: "EmployeeProjectWeeklyCapacities",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
@@ -83,19 +84,19 @@ namespace Pomelo.Migrations
                     EmployeeId = table.Column<long>(type: "INTEGER", nullable: false),
                     ProjectId = table.Column<long>(type: "INTEGER", nullable: false),
                     Start = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Hours = table.Column<long>(type: "INTEGER", nullable: false)
+                    Capacity = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WeeklyProjectCapacities", x => x.Id);
+                    table.PrimaryKey("PK_EmployeeProjectWeeklyCapacities", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_WeeklyProjectCapacities_Employees_EmployeeId",
+                        name: "FK_EmployeeProjectWeeklyCapacities_Employees_EmployeeId",
                         column: x => x.EmployeeId,
                         principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_WeeklyProjectCapacities_Projects_ProjectId",
+                        name: "FK_EmployeeProjectWeeklyCapacities_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
@@ -103,38 +104,38 @@ namespace Pomelo.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlannedHours_EmployeeId",
-                table: "PlannedHours",
+                name: "IX_EmployeeProjectHours_EmployeeId",
+                table: "EmployeeProjectHours",
                 column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlannedHours_ProjectId",
-                table: "PlannedHours",
+                name: "IX_EmployeeProjectHours_ProjectId",
+                table: "EmployeeProjectHours",
+                column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeeProjectWeeklyCapacities_EmployeeId",
+                table: "EmployeeProjectWeeklyCapacities",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeeProjectWeeklyCapacities_ProjectId",
+                table: "EmployeeProjectWeeklyCapacities",
                 column: "ProjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Projects_OwnerId",
                 table: "Projects",
                 column: "OwnerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_WeeklyProjectCapacities_EmployeeId",
-                table: "WeeklyProjectCapacities",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_WeeklyProjectCapacities_ProjectId",
-                table: "WeeklyProjectCapacities",
-                column: "ProjectId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PlannedHours");
+                name: "EmployeeProjectHours");
 
             migrationBuilder.DropTable(
-                name: "WeeklyProjectCapacities");
+                name: "EmployeeProjectWeeklyCapacities");
 
             migrationBuilder.DropTable(
                 name: "Projects");

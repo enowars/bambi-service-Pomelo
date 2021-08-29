@@ -21,7 +21,7 @@
           <td v-for="weeklyProjectCapacity in week.capacities" :key="weeklyProjectCapacity.projectId" v-on:change="onInput(weeklyProjectCapacity)">
             <!-- @input="event => onInput(event, weeklyProjectCapacity.projectId, weeklyProjectCapacity.start)" -->
             <!-- <div contenteditable="true">{{ weeklyProjectCapacity.hours }}</div> -->
-            <input type="number" v-model="weeklyProjectCapacity.hours">
+            <input type="number" v-model="weeklyProjectCapacity.capacity">
           </td>
         </tr>
       </tbody>
@@ -30,14 +30,14 @@
 </template>
 
 <script lang="ts">
-import { Employee, getAccountData, getAccountInfo, getAccountUserData, getProjectDepartmentProjects, postWeeklyProjectCapacity, Project, WeeklyProjectCapacity } from '@/services/pomeloAPI'
+import { Employee, getAccountData, getAccountInfo, getAccountUserData, getProjectDepartmentProjects, postWeeklyProjectCapacity, Project, EmployeeProjectWeeklyCapacity } from '@/services/pomeloAPI'
 import { defineComponent, inject } from 'vue'
 import { useRoute } from 'vue-router'
 
 interface Week {
   begin: string,
   reserve: 0,
-  capacities: WeeklyProjectCapacity[]
+  capacities: EmployeeProjectWeeklyCapacity[]
 }
 
 export default defineComponent({
@@ -54,8 +54,8 @@ export default defineComponent({
     this.init()
   },
   methods: {
-    async onInput(capacity: WeeklyProjectCapacity) {
-      await postWeeklyProjectCapacity(this.employeeId, capacity.projectId, capacity.start, capacity.hours)
+    async onInput(capacity: EmployeeProjectWeeklyCapacity) {
+      await postWeeklyProjectCapacity(this.employeeId, capacity.projectId, capacity.start, capacity.capacity)
     },
     async init() {
       this.employee = await getAccountUserData(this.employeeId)
@@ -73,7 +73,7 @@ export default defineComponent({
         for (var p in this.employee.plannedHours) {
           const plannedHours = this.employee.plannedHours[p]
           console.log('handling project ' + plannedHours.projectId)
-          const upstreamCapacity = this.employee.weeklyProjectCapacities
+          const upstreamCapacity = this.employee.employeeProjectWeeklyCapacities
             .find(wpc => wpc.projectId === plannedHours.projectId && new Date(Date.parse(wpc.start + 'Z')).getTime() === begin.getTime())
           if (upstreamCapacity) {
             week.capacities.push(upstreamCapacity)
@@ -83,8 +83,8 @@ export default defineComponent({
               employeeId: this.employeeId,
               projectId: plannedHours.projectId,
               start: begin.toUTCString(),
-              hours: 0
-            } as WeeklyProjectCapacity)
+              capacity: 0
+            } as EmployeeProjectWeeklyCapacity)
           }
         }
         console.log(week)

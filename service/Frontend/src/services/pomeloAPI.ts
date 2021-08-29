@@ -1,17 +1,17 @@
-export interface PlannedHours {
+export interface EmployeeProjectHours {
   id: number,
   employeeId: number,
   projectId: number,
   totalHours: number,
-  performedHours: number
+  deliveredHours: number
 }
 
-export interface WeeklyProjectCapacity {
+export interface EmployeeProjectWeeklyCapacity {
   id: number,
   employeeId: number,
   projectId: number,
   start: string,
-  hours: number
+  capacity: number
 }
 
 export interface Employee {
@@ -19,8 +19,8 @@ export interface Employee {
   name: string,
   department: string,
   note: string | null,
-  plannedHours: PlannedHours[],
-  weeklyProjectCapacities: WeeklyProjectCapacity[]
+  plannedHours: EmployeeProjectHours[],
+  employeeProjectWeeklyCapacities: EmployeeProjectWeeklyCapacity[]
 }
 
 export interface Project {
@@ -28,8 +28,8 @@ export interface Project {
   name: string,
   begin: string,
   end: string,
-  plannedHours: PlannedHours[],
-  weeklyProjectCapacities: WeeklyProjectCapacity[]
+  employeeProjectHours: EmployeeProjectHours[],
+  employeeProjectWeeklyCapacities: EmployeeProjectWeeklyCapacity[]
 }
 
 export const getAccountInfo = async () : Promise<Employee | null> => {
@@ -91,7 +91,7 @@ export const getAccountDepartment = async () : Promise<Employee[]> => {
   }).then(val => val.json()) as Employee[]
 }
 
-export const postProjectTotalPlanning = async (employeeId: number, projectId: number, hours: number) : Promise<PlannedHours | null> => {
+export const postProjectTotalPlanning = async (employeeId: number, projectId: number, hours: number) : Promise<EmployeeProjectHours | null> => {
   console.log(employeeId)
   console.log(projectId)
   console.log(hours)
@@ -103,7 +103,7 @@ export const postProjectTotalPlanning = async (employeeId: number, projectId: nu
     return await fetch('/api/project/totalplanning', {
       method: 'POST',
       body: form
-    }).then(val => val.json()) as PlannedHours
+    }).then(val => val.json()) as EmployeeProjectHours
   } catch {
     return null
   }

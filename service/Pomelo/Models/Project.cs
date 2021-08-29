@@ -22,9 +22,9 @@
 
         public DateTime End { get; set; }
 
-        public List<PlannedHours> PlannedHours { get; set; }
+        public List<EmployeeProjectHours> EmployeeProjectHours { get; set; }
 
-        public List<WeeklyProjectCapacity> WeeklyProjectCapacities { get; set; }
+        public List<EmployeeProjectWeeklyCapacity> EmployeeProjectWeeklyCapacities { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     }
 }
