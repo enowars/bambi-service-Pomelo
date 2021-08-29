@@ -25,6 +25,8 @@
         public List<EmployeeProjectHours> EmployeeProjectHours { get; set; }
 
         public List<EmployeeProjectWeeklyCapacity> EmployeeProjectWeeklyCapacities { get; set; }
+
+        public DateTime DeliveredHoursTimestamp { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     }
 }

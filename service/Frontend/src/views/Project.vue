@@ -54,7 +54,7 @@ export default defineComponent({
       project: null as Project | null,
       departmentEmployees: [] as Employee[],
       uninvolvedEmployees: [] as Employee[],
-      plannedHours: null as number | null,
+      eph: null as number | null,
       newEmployee: null as Employee | null,
       newHours: null as number | null,
       burnDownChartData: null as any
@@ -92,7 +92,7 @@ export default defineComponent({
       newDate.setDate(newDate.getDate() + days)
       return newDate
     },
-    getWorkingDays(begin: Date, end: Date) { // TODO: Take vacation into account
+    getWorkingDays(begin: Date, end: Date) : number { // TODO: Take vacation into account
       let days = 0
       begin.setUTCHours(0, 0, 0, 0) // TODO throw if these are no utc days
       end.setUTCHours(0, 0, 0, 0)
@@ -105,16 +105,20 @@ export default defineComponent({
         }
         t = this.addDays(t, 1)
       }
-      console.log(t)
-      console.log(end)
       return days
+    },
+    getMonday(d: Date) : Date { // https://stackoverflow.com/questions/4156434/javascript-get-the-first-day-of-the-week-from-current-date
+      var day = d.getDay()
+      var diff = d.getDate() - day + (day === 0 ? -6 : 1) // adjust when day is sunday
+      return new Date(d.setDate(diff))
     },
     updateBurnDownChart(project: Project) {
       // The burndown chart starts at the last booking.
       // Bookings may happen at any time, so the begun week needs special handling.
       const today = new Date()
       today.setUTCHours(0, 0, 0, 0)
-      const projectHours = project.employeeProjectHours.reduce((sum, plannedHours) => sum + plannedHours.totalHours, 0)
+      const totalProjectHours = project.employeeProjectHours.reduce((sum, eph) => sum + eph.totalHours, 0)
+      const deliveredProjectHours = project.employeeProjectHours.reduce((sum, eph) => sum + eph.deliveredHours, 0)
       const projectBegin = new Date(Date.parse(project.begin + 'Z'))
       const projectEnd = new Date(Date.parse(project.end + 'Z'))
       const totalWorkingDays = this.getWorkingDays(projectBegin, projectEnd)
@@ -123,16 +127,15 @@ export default defineComponent({
       const allocatedHours = []
 
       var weekBegin = new Date()
+      weekBegin = this.getMonday(weekBegin)
       weekBegin.setUTCHours(0, 0, 0, 0)
-      weekBegin.setUTCDate(1)
 
-      // TODO start with done hours
-      var projectAllocatedHours = 0
-      for (var i = 0; i < 12; i++) {
-        // console.log(`pushing week ${weekBegin}`)
+      var projectAllocatedHours = deliveredProjectHours
+      for (var i = 0; i < 4; i++) {
+        console.log(`handling week ${weekBegin}`)
         allocatedHours.push([
           weekBegin.toString(),
-          projectHours - projectAllocatedHours
+          totalProjectHours - projectAllocatedHours
         ])
         var diff = project.employeeProjectWeeklyCapacities
           .filter(wpc => new Date(Date.parse(wpc.start + 'Z')).getTime() === weekBegin.getTime())
@@ -143,13 +146,13 @@ export default defineComponent({
       }
       // console.log(allocatedHours)
       // console.log(`today: ${today} passedQuota: ${remainingQuota}`)
-      // console.log(`project end: ${project!.end}`)
+      console.log(`project end: ${project!.end}`)
       this.burnDownChartData = {
         series: [
           {
             name: 'Total Hours',
             data: [
-              [today.toString(), Math.round(projectHours * remainingQuota)],
+              [today.toString(), Math.round(totalProjectHours * remainingQuota)],
               [project!.end, 0]
             ]
           },

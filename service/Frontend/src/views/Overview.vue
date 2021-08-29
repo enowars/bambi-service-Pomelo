@@ -41,14 +41,14 @@ export default defineComponent({
     return {
       projectName: null as string | null,
       projects: [] as Project[],
-      startDate: null as Date | null,
-      endDate: null as Date | null
+      startDate: null as string | null,
+      endDate: null as string | null
     }
   },
   methods: {
     async createProject() {
       if (this.projectName !== null && this.startDate !== null && this.endDate !== null) {
-        await postProjectCreate(this.projectName, this.startDate, this.endDate)
+        await postProjectCreate(this.projectName, new Date(Date.parse(this.startDate)), new Date(Date.parse(this.endDate)))
         await this.init()
       }
     },

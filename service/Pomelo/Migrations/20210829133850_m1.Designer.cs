@@ -9,7 +9,7 @@ using Pomelo.Database;
 namespace Pomelo.Migrations
 {
     [DbContext(typeof(PomeloDbContext))]
-    [Migration("20210829112406_m1")]
+    [Migration("20210829133850_m1")]
     partial class m1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,9 +48,6 @@ namespace Pomelo.Migrations
 
                     b.Property<long>("DeliveredHours")
                         .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("DeliveredHoursTimestamp")
-                        .HasColumnType("TEXT");
 
                     b.Property<long>("EmployeeId")
                         .HasColumnType("INTEGER");
@@ -104,6 +101,9 @@ namespace Pomelo.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Begin")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DeliveredHoursTimestamp")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Department")

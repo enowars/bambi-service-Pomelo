@@ -33,7 +33,8 @@ namespace Pomelo.Migrations
                     Department = table.Column<string>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Begin = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    End = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    End = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DeliveredHoursTimestamp = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -55,8 +56,7 @@ namespace Pomelo.Migrations
                     EmployeeId = table.Column<long>(type: "INTEGER", nullable: false),
                     ProjectId = table.Column<long>(type: "INTEGER", nullable: false),
                     TotalHours = table.Column<long>(type: "INTEGER", nullable: false),
-                    DeliveredHours = table.Column<long>(type: "INTEGER", nullable: false),
-                    DeliveredHoursTimestamp = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    DeliveredHours = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
