@@ -43,6 +43,7 @@
 
 <script lang="ts">
 import { Project, getProjectDetails, Employee, getAccountDepartment, postProjectTotalPlanning } from '@/services/pomeloAPI'
+import { getLastMonday, addDays } from '@/util'
 import { defineComponent } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -87,11 +88,6 @@ export default defineComponent({
       }
       return 'UNKNOWN'
     },
-    addDays(date: Date, days: number) : Date {
-      var newDate = new Date(date)
-      newDate.setDate(newDate.getDate() + days)
-      return newDate
-    },
     getWorkingDays(begin: Date, end: Date) : number { // TODO: Take vacation into account
       let days = 0
       begin.setUTCHours(0, 0, 0, 0) // TODO throw if these are no utc days
@@ -103,14 +99,9 @@ export default defineComponent({
         if (day > 0 && day < 6) {
           days += 1
         }
-        t = this.addDays(t, 1)
+        t = addDays(t, 1)
       }
       return days
-    },
-    getMonday(d: Date) : Date { // https://stackoverflow.com/questions/4156434/javascript-get-the-first-day-of-the-week-from-current-date
-      var day = d.getDay()
-      var diff = d.getDate() - day + (day === 0 ? -6 : 1) // adjust when day is sunday
-      return new Date(d.setDate(diff))
     },
     updateBurnDownChart(project: Project) {
       // The burndown chart starts at the last booking.
@@ -124,43 +115,40 @@ export default defineComponent({
       const totalWorkingDays = this.getWorkingDays(projectBegin, projectEnd)
       const remainingWorkingDays = this.getWorkingDays(today, projectEnd)
       const remainingQuota = remainingWorkingDays / totalWorkingDays
-      const allocatedHours = []
+      const plannedHours = []
 
-      var weekBegin = new Date()
-      weekBegin = this.getMonday(weekBegin)
+      var weekBegin = getLastMonday(new Date())
       weekBegin.setUTCHours(0, 0, 0, 0)
 
-      var projectAllocatedHours = deliveredProjectHours
+      var predictedRemainingHours = totalProjectHours - deliveredProjectHours
       for (var i = 0; i < 12; i++) {
-        console.log(`handling week ${weekBegin}`)
-        allocatedHours.push([
+        plannedHours.push([
           weekBegin.toString(),
-          projectAllocatedHours
+          predictedRemainingHours
         ])
         var pwc = project.employeeProjectWeeklyCapacities
           .filter(wpc => new Date(Date.parse(wpc.start + 'Z')).getTime() === weekBegin.getTime())[0]
 
-        if (!pwc) {
-          throw Error('möp')
+        if (pwc) {
+          predictedRemainingHours -= (pwc.capacity / 100) * 40
         }
-        weekBegin = this.addDays(weekBegin, 7)
-        projectAllocatedHours -= (pwc.capacity / 100) * 40
+        weekBegin = addDays(weekBegin, 7)
       }
-      // console.log(allocatedHours)
+      // console.log(plannedHours)
       // console.log(`today: ${today} passedQuota: ${remainingQuota}`)
       console.log(`project end: ${project!.end}`)
       this.burnDownChartData = {
         series: [
           {
-            name: 'Total Hours',
+            name: 'Linear Hours',
             data: [
               [today.toString(), Math.round(totalProjectHours * remainingQuota)],
               [project!.end, 0]
             ]
           },
           {
-            name: 'Allocated Hours',
-            data: allocatedHours
+            name: 'Predicted Hours',
+            data: plannedHours
           }
         ],
         options: {
@@ -187,7 +175,6 @@ export default defineComponent({
           }
         }
       }
-      console.log(this.burnDownChartData)
     }
   }
 })

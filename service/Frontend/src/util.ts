@@ -4,3 +4,9 @@ export const getLastMonday = (dt: Date) : Date => {
   localDt.setDate(localDt.getDate() - (localDt.getDay() + 6) % 7)
   return localDt
 }
+
+export function addDays(date: Date, days: number) : Date {
+  const newDate = new Date(date)
+  newDate.setDate(newDate.getDate() + days)
+  return newDate
+}

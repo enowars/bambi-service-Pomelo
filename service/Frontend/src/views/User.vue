@@ -31,7 +31,7 @@
 
 <script lang="ts">
 import { Employee, getAccountData, getAccountInfo, getAccountUserData, getProjectDepartmentProjects, postWeeklyProjectCapacity, Project, EmployeeProjectWeeklyCapacity } from '@/services/pomeloAPI'
-import { getLastMonday } from '@/util'
+import { addDays, getLastMonday } from '@/util'
 import { defineComponent, inject } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -64,9 +64,6 @@ export default defineComponent({
       var begin = new Date()
       begin.setUTCHours(0, 0, 0, 0)
       begin = getLastMonday(begin)
-      console.log('###')
-      console.log(begin)
-      console.log(begin.toUTCString())
 
       for (var i = 0; i < 12; i++) {
         // build a week
@@ -78,7 +75,6 @@ export default defineComponent({
         } as Week
         for (var p in this.employee.employeeProjectHours) {
           const plannedHours = this.employee.employeeProjectHours[p]
-          console.log('handling project ' + plannedHours.projectId)
           const upstreamCapacity = this.employee.employeeProjectWeeklyCapacities
             .find(wpc => wpc.projectId === plannedHours.projectId && new Date(Date.parse(wpc.start + 'Z')).getTime() === begin.getTime())
           if (upstreamCapacity) {
@@ -94,14 +90,9 @@ export default defineComponent({
           }
         }
         this.weeks.push(week)
-        begin = this.addDays(begin, 7)
+        begin = addDays(begin, 7)
       }
       console.log(this.weeks)
-    },
-    addDays(date: Date, days: number) : Date {
-      var newDate = new Date(date)
-      newDate.setDate(newDate.getDate() + days)
-      return newDate
     },
     getProjectName(projectId: number) : string {
       const project = this.projects.find(p => p.id === projectId)
