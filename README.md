@@ -64,6 +64,8 @@ The UUID of a department is leaked, an can be used to join a department
 - flags in filenames, dirlisting enabled? DirectoryBrowserOptions may differ from StaticFileOptions
     - leak UUIDs?
 - leak signing key thorugh LFI?
+- new Guid()?
+- Change Id of your department somehow, retain old session?
 
 
 # TODO
