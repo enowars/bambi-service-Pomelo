@@ -4,6 +4,7 @@ docker-compose.yml
 .gitignore
 .vs
 /data
+/uploads
 Pomelo/bin
 Pomelo/obj
 Pomelo/wwwroot

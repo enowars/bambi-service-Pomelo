@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { Employee, getAccountData, getAccountInfo, getAccountUserData, getProjectDepartmentProjects, postWeeklyProjectCapacity, Project, EmployeeProjectWeeklyCapacity } from '@/services/pomeloAPI'
+import { Employee, getAccountInfo, getAccountUserData, getProjectDepartmentProjects, postWeeklyProjectCapacity, Project, EmployeeProjectWeeklyCapacity } from '@/services/pomeloAPI'
 import { addDays, getLastMonday } from '@/util'
 import { defineComponent, inject } from 'vue'
 import { useRoute } from 'vue-router'

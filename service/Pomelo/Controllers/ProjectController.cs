@@ -9,6 +9,7 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Pomelo.Database;
+    using Pomelo.DataTransferObjects;
     using Pomelo.Models;
 
     [Route("api/[controller]/[action]")]
@@ -23,36 +24,37 @@
         }
 
         [HttpGet]
-        public async Task<IActionResult> DepartmentProjects()
+        public async Task<ActionResult<List<ProjectInfoDto>>> Projects()
         {
-            var owner = this.HttpContext.User.FindFirst(ClaimTypes.Name)?.Value;
-            if (owner == null)
+            var userId = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
-                return this.Forbid();
-            }
-
-            var dbOwner = await this.dbContext.Employees
-                .Where(e => e.Name == owner)
-                .FirstAsync(this.HttpContext.RequestAborted);
-
-            var projects = await this.dbContext.Projects
-                .Where(p => p.Department == dbOwner.Department)
-                .ToArrayAsync(this.HttpContext.RequestAborted);
-
-            return this.Json(projects);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Details(long projectId)
-        {
-            var user = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (user == null)
-            {
-                return this.Forbid();
+                return this.Unauthorized();
             }
 
             var dbUser = await this.dbContext.Employees
-                .Where(e => e.Id == long.Parse(user))
+                .Where(e => e.Id == long.Parse(userId))
+                .FirstAsync(this.HttpContext.RequestAborted);
+
+            var projects = await this.dbContext.Projects
+                .Where(p => p.Department == dbUser.Department)
+                .ToArrayAsync(this.HttpContext.RequestAborted);
+
+            return projects.Select(p => new ProjectInfoDto(p)).ToList();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<ProjectDto>> Project(long projectId)
+        {
+            // TODO use department from session?
+            var userId = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return this.Unauthorized();
+            }
+
+            var dbUser = await this.dbContext.Employees
+                .Where(e => e.Id == long.Parse(userId))
                 .AsNoTracking()
                 .SingleAsync(this.HttpContext.RequestAborted);
 
@@ -66,50 +68,41 @@
                 return this.Forbid();
             }
 
-            var plannings = await this.dbContext.EmployeeProjectHours
-                .Where(tp => tp.ProjectId == projectId)
-                .AsNoTracking()
-                .ToListAsync(this.HttpContext.RequestAborted);
-
-            var capacities = await this.dbContext.EmployeeProjectWeeklyCapacities
-                .Where(wc => wc.ProjectId == projectId)
-                .AsNoTracking()
-                .ToListAsync(this.HttpContext.RequestAborted);
-
-            project.EmployeeProjectHours = plannings;
-            project.EmployeeProjectWeeklyCapacities = capacities;
-
-            return this.Json(project);
+            return await this.GetProject(projectId);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromForm]string name, [FromForm] DateTime begin, [FromForm] DateTime end)
+        public async Task<ActionResult<ProjectDto>> Project([FromForm]string name, [FromForm] DateTime begin, [FromForm] DateTime end)
         {
-            var owner = this.HttpContext.User.FindFirst(ClaimTypes.Name)?.Value;
-            if (owner == null)
+            var userId = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
                 return this.Forbid();
             }
 
-            var dbOwner = await this.dbContext.Employees
-                .Where(e => e.Name == owner)
+            var dbUser = await this.dbContext.Employees
+                .Where(e => e.Id == long.Parse(userId))
                 .FirstAsync(this.HttpContext.RequestAborted);
             var newProject = new Project()
             {
-                Owner = dbOwner,
-                Department = dbOwner.Department,
+                OwnerId = dbUser.Id,
+                Department = dbUser.Department,
                 Name = name,
                 Begin = begin,
                 End = end,
             };
             this.dbContext.Projects.Add(newProject);
             await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
-            return this.Json(newProject);
+            return await this.GetProject(newProject.Id);
         }
 
         [HttpPost]
-        public async Task<IActionResult> TotalPlanning([FromForm] long employeeId, [FromForm] long projectId, [FromForm] long hours)
+        public async Task<ActionResult<ProjectDto>> Hours([FromForm] long employeeId, [FromForm] long projectId, [FromForm] long hours)
         {
+            var project = await this.dbContext.Projects
+                .Where(p => p.Id == projectId)
+                .AsNoTracking()
+                .SingleAsync();
             EmployeeProjectHours? totalPlanning = await this.dbContext.EmployeeProjectHours
                 .Where(tp => tp.EmployeeId == employeeId)
                 .Where(tp => tp.ProjectId == projectId)
@@ -131,11 +124,11 @@
             }
 
             await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
-            return this.Json(totalPlanning);
+            return this.Json(project);
         }
 
         [HttpPost]
-        public async Task WeeklyProjectCapacity([FromForm] long employeeId, [FromForm] long projectId, [FromForm] DateTime start, [FromForm] long capacity)
+        public async Task<ProjectDto> Capacity([FromForm] long employeeId, [FromForm] long projectId, [FromForm] DateTime start, [FromForm] long capacity)
         {
             EmployeeProjectWeeklyCapacity? weeklyProjectCapacity = await this.dbContext.EmployeeProjectWeeklyCapacities
                 .Where(wpc => wpc.ProjectId == projectId)
@@ -161,6 +154,27 @@
             }
 
             await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
+            return await this.GetProject(projectId);
+        }
+
+        private async Task<ProjectDto> GetProject(long projectId)
+        {
+            var project = await this.dbContext.Projects
+                .Where(p => p.Id == projectId)
+                .SingleAsync();
+
+            var projectHours = await this.dbContext.EmployeeProjectHours
+                .Where(eph => eph.ProjectId == projectId)
+                .ToListAsync();
+
+            var projectCapacities = await this.dbContext.EmployeeProjectWeeklyCapacities
+                .Where(epwc => epwc.ProjectId == projectId)
+                .ToListAsync();
+
+            project.EmployeeProjectHours = projectHours;
+            project.EmployeeProjectWeeklyCapacities = projectCapacities;
+
+            return new ProjectDto(project);
         }
     }
 }

@@ -65,7 +65,10 @@ namespace Pomelo
             // var rewriteOptions = new RewriteOptions()
             //    .AddRewrite("^.*$", "/", true);
             // app.UseRewriter(rewriteOptions);
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                ServeUnknownFileTypes = true,
+            });
             app.UseDirectoryBrowser();
             dbContext.Database.Migrate();
         }

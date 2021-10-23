@@ -41,14 +41,6 @@ export const getAccountInfo = async () : Promise<Employee | null> => {
   }
 }
 
-export const getAccountData = async () : Promise<Employee | null> => {
-  try {
-    return await (await fetch('/api/account/data')).json() as Employee
-  } catch {
-    return null
-  }
-}
-
 export const postAccountRegister = async (employeeName: string, department: string) : Promise<Employee> => {
   const form = new FormData()
   form.append('employeeName', employeeName)

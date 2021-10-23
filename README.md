@@ -13,13 +13,6 @@ planned capacity
 - personal page (see all projects with bookings)
 - public/private projects?
 
-## Flagstores
-### User Field: Notes
-### Planned Hours Field: Comment
-
-### Fileuploads
-The "SAP Export" files contain flags.
-
 ## DB
 Users(uuid)
 Planning(userId, projectId, amount)
@@ -36,17 +29,22 @@ See swagger
 - "./data:/data"
 - cookie signing key
 
+
+## Flagstores
+- 0: User.Note
+- 1: Project.Name
+- 2: Booking file header
+
 ## Vulns
-
-### Register with same username and create new project
-The project creation leaks all properties of first user with that name, including the note field.
-
-### Join forgein project and get details
+- 0: Register with same username and update note?
+    - pwns: 0
+- 1: Create TotalPlanning/Capacity in foreign project
+    - pwns: 1
+- 2: new Guid() is null-y guid, get booking file
+    - pwns: 2
 
 ### Add foreign user to project and get note?
 
-### DB Leak?
-The sqlite3 database was in the wwwroot, and thus served to any requesting user agent.
 
 ### Cookie Signing Key?
 The cookie signing key was in the wwwroot, and thus served to any requesting user agent.

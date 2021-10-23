@@ -358,6 +358,7 @@ MigrationBackup/
 
 .vscode/
 /data
+/uploads
 Pomelo/Pomelo.db
 Pomelo/Pomelo.db-shm
 Pomelo/Pomelo.db-wal

@@ -12,6 +12,7 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using Pomelo.Database;
+    using Pomelo.DataTransferObjects;
     using Pomelo.Models;
 
     [Route("api/[controller]/[action]")]
@@ -27,114 +28,30 @@
             this.dbContext = dbContext;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Register([FromForm] string employeeName, [FromForm] string department)
-        {
-            this.logger.LogDebug($"POST /account/register({employeeName}, {department})");
-            var newEmployee = new Employee()
-            {
-                Name = employeeName,
-                Department = department,
-            };
-            this.dbContext.Employees.Add(newEmployee);
-            await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, employeeName),
-                new Claim(ClaimTypes.NameIdentifier, newEmployee.Id.ToString()),
-            };
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            await this.HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity));
-            return this.Json(newEmployee);
-        }
-
         [HttpGet]
-        public async Task<IActionResult> Info()
+        public async Task<ActionResult<EmployeeDto>> Account()
         {
-            var owner = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (owner == null)
+            var userId = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
-                return this.Forbid();
-            }
-
-            var dbOwner = await this.dbContext.Employees
-                .Where(e => e.Id == long.Parse(owner))
-                .FirstAsync(this.HttpContext.RequestAborted);
-            return this.Json(dbOwner);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Logout()
-        {
-            await this.HttpContext.SignOutAsync();
-            return this.NoContent();
-        }
-
-        [HttpGet]
-        public async Task<ActionResult<Employee[]>> Latest()
-        {
-            return await this.dbContext.Employees
-                .OrderByDescending(e => e.Id)
-                .Take(10)
-                .ToArrayAsync(this.HttpContext.RequestAborted);
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<Employee>> Note([FromForm] string newNote)
-        {
-            var owner = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (owner == null)
-            {
-                return this.Forbid();
-            }
-
-            var dbOwner = await this.dbContext.Employees
-                .Where(e => e.Id == long.Parse(owner))
-                .FirstAsync(this.HttpContext.RequestAborted);
-            dbOwner.Note = newNote;
-            await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
-            return dbOwner;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Data()
-        {
-            var owner = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (owner == null)
-            {
-                return this.Forbid();
+                return this.Unauthorized();
             }
 
             var employee = await this.dbContext.Employees
-                .Where(e => e.Id == long.Parse(owner))
-                .AsNoTracking()
+                .Where(e => e.Id == long.Parse(userId))
                 .SingleAsync(this.HttpContext.RequestAborted);
 
-            var plannings = await this.dbContext.EmployeeProjectHours
-                .Where(tp => tp.EmployeeId == employee.Id)
-                .Include(e => e.Project)
-                .AsNoTracking()
-                .ToListAsync(this.HttpContext.RequestAborted);
-
-            var capacities = await this.dbContext.EmployeeProjectWeeklyCapacities
-                .Where(wc => wc.EmployeeId == employee.Id)
-                .AsNoTracking()
-                .ToListAsync(this.HttpContext.RequestAborted);
-
-            employee.EmployeeProjectHours = plannings;
-            employee.EmployeeProjectWeeklyCapacities = capacities;
-
-            return this.Json(employee);
+            return new EmployeeDto(employee);
         }
 
         [HttpGet]
-        public async Task<IActionResult> Department()
+        public async Task<ActionResult<List<EmployeeDto>>> Department()
         {
             this.logger.LogInformation($"GET Department");
             var user = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (user == null)
             {
-                return this.Forbid();
+                return this.Unauthorized();
             }
 
             var employee = await this.dbContext.Employees
@@ -145,16 +62,16 @@
                 .Where(e => e.Department == employee.Department)
                 .ToArrayAsync(this.HttpContext.RequestAborted);
 
-            return this.Json(department);
+            return department.Select(e => new EmployeeDto(e)).ToList();
         }
 
         [HttpGet]
-        public async Task<IActionResult> UserData(long employeeId)
+        public async Task<ActionResult<EmployeeDto>> Employee(long employeeId)
         {
             var user = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (user == null)
             {
-                return this.Forbid();
+                return this.Unauthorized();
             }
 
             var dbUser = await this.dbContext.Employees
@@ -182,7 +99,60 @@
                 .AsNoTracking()
                 .ToListAsync(this.HttpContext.RequestAborted);
 
-            return this.Json(employee);
+            return new EmployeeDto(employee);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<EmployeeDto>> Register([FromForm] string employeeName, [FromForm] string department, [FromForm] string? note)
+        {
+            this.logger.LogDebug($"POST /account/register({employeeName}, {department})");
+            var newEmployee = new Employee()
+            {
+                Name = employeeName,
+                Department = department,
+                Note = note,
+            };
+            this.dbContext.Employees.Add(newEmployee);
+            await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
+
+            // Save the name, id and department to the session
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, employeeName),
+                new Claim(ClaimTypes.NameIdentifier, newEmployee.Id.ToString()),
+                new Claim(ClaimTypes.GroupSid, department),
+            };
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await this.HttpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity));
+            return new EmployeeDto(newEmployee);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<EmployeeDto>> Note([FromForm] string note)
+        {
+            var userId = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return this.Forbid();
+            }
+
+            (await this.dbContext.Employees
+                .Where(e => e.Id == long.Parse(userId))
+                .SingleAsync(this.HttpContext.RequestAborted))
+                .Note = note;
+
+            await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
+
+            return new EmployeeDto(await this.dbContext.Employees
+                .Where(e => e.Name == this.HttpContext.User.FindFirst(ClaimTypes.Name)!.Value)
+                .FirstAsync(this.HttpContext.RequestAborted));
+        }
+
+        [HttpPost]
+        public async Task<NoContentResult> Logout()
+        {
+            await this.HttpContext.SignOutAsync();
+            return this.NoContent();
         }
     }
 }

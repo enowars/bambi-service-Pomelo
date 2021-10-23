@@ -2,7 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
+    using System.Security.Claims;
+    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -22,27 +25,40 @@
         }
 
         [HttpPost]
-        public async Task<IActionResult> Upload(long projectId, IFormFile file)
+        public async Task<ActionResult<string>> Upload(long projectId, IFormFile file)
         {
-            var localPath = $"wwwroot/Uploads/{file.GetHashCode()}";
-            using var stream = System.IO.File.Create(localPath);
-            await file.CopyToAsync(stream);
-            var lines = await System.IO.File.ReadAllLinesAsync(localPath, this.HttpContext.RequestAborted);
-            var header = lines[0];
-            if (header != projectId.ToString())
+            var user = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var dep = this.HttpContext.User.FindFirst(ClaimTypes.GroupSid)?.Value;
+            if (user == null || dep == null)
             {
-                return this.BadRequest("projectId and file header don't match");
+                return this.Unauthorized();
             }
+
+            var project = await this.dbContext.Projects
+                .Where(p => p.Id == projectId)
+                .SingleAsync(this.HttpContext.RequestAborted);
+
+            if (project.Department != dep)
+            {
+                return this.Forbid();
+            }
+
+            var guid = new Guid();
+            var localPath = $"/Uploads/{projectId}_{guid}.csv";
+            using var reader = new StreamReader(file.OpenReadStream());
+            var content = await reader.ReadToEndAsync();
+            var lines = content.Split('\n');
+            var header = lines[0];
 
             foreach (var line in lines.Skip(1))
             {
                 var split = line.Split(',');
                 var employeeId = long.Parse(split[0]);
-                var hours = long.Parse(split[0]);
+                var hours = long.Parse(split[1]);
                 var totalPlanning = await this.dbContext.EmployeeProjectHours
                     .Where(tp => tp.ProjectId == projectId)
                     .Where(tp => tp.EmployeeId == employeeId)
-                    .SingleAsync(this.HttpContext.RequestAborted);
+                    .SingleOrDefaultAsync(this.HttpContext.RequestAborted);
                 if (totalPlanning != null)
                 {
                     totalPlanning.DeliveredHours = hours;
@@ -61,6 +77,7 @@
             }
 
             await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
+            await System.IO.File.WriteAllBytesAsync($"wwwroot/{localPath}", Encoding.ASCII.GetBytes(content), this.HttpContext.RequestAborted);
             return this.Ok(localPath);
         }
     }

@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  pomelo-checker:
+    build: .
+    ports:
+      - 8000:8000
+    environment:
+     - MONGO_ENABLED=1
+     - MONGO_HOST=pomelo-checker-db
+     - MONGO_PORT=27017
+     - MONGO_USER=enoislove
+     - MONGO_PASSWORD=enoislife1338
+  pomelo-checker-db:
+    image: mongo
+    # volumes:
+    #  - ./pomelo-checker-db:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: enoislove
+      MONGO_INITDB_ROOT_PASSWORD: enoislife1338
