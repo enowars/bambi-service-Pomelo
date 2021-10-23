@@ -52,7 +52,7 @@ async def register_user(client: AsyncClient, employeeName: str, department: str,
         raise MumbleException("POST /api/account/register did not set cookie")
 
     try:
-        account = EmployeeDto.from_json(response.text) # type: ignore
+        account = EmployeeDto.from_json(response.text)  # type: ignore
     except:
         raise MumbleException("GET /api/account/register returned unexpected data")
     return (account, cookie)
@@ -69,7 +69,7 @@ async def get_account(client: AsyncClient, logger: LoggerAdapter) -> EmployeeDto
     assert_equals(response.status_code, 200, "GET /api/account/account failed")
 
     try:
-        account = EmployeeDto.from_json(response.text) # type: ignore
+        account = EmployeeDto.from_json(response.text)  # type: ignore
     except:
         raise MumbleException("GET /api/account/account returned unexpected data")
 
@@ -86,7 +86,7 @@ async def update_note(client: AsyncClient, note: str, logger: LoggerAdapter) -> 
     assert_equals(response.status_code, 200, "POST /api/account/note failed")
 
     try:
-        account = EmployeeDto.from_json(response.text) # type: ignore
+        account = EmployeeDto.from_json(response.text)  # type: ignore
     except:
         raise MumbleException("POST /api/account/note returned unexpected data")
 
@@ -103,7 +103,7 @@ async def create_project(client: AsyncClient, name: str, begin: datetime, end: d
     assert_equals(response.status_code, 200, "POST /api/project/project failed")
 
     try:
-        account = ProjectDto.from_json(response.text) # type: ignore
+        account = ProjectDto.from_json(response.text)  # type: ignore
     except:
         raise MumbleException("POST /api/project/project returned unexpected data")
 
@@ -121,7 +121,7 @@ async def get_project(client: AsyncClient, id: int, logger: LoggerAdapter) -> Pr
     assert_equals(response.status_code, 200, "GET /api/project/project failed")
 
     try:
-        project = ProjectDto.from_json(response.text) # type: ignore
+        project = ProjectDto.from_json(response.text)  # type: ignore
     except:
         raise MumbleException("GET /api/project/project returned unexpected data")
 
@@ -137,7 +137,7 @@ async def set_capacity(client: AsyncClient, employee_id: int, project_id: int, s
     assert_equals(response.status_code, 200, "POST /api/project/capacity failed")
 
     try:
-        account = ProjectDto.from_json(response.text) # type: ignore
+        account = ProjectDto.from_json(response.text)  # type: ignore
     except:
         raise MumbleException("POST /api/project/capacity returned unexpected data")
 
@@ -251,13 +251,13 @@ async def getflag_booking(task: GetflagCheckerTaskMessage, session0: AsyncClient
 
 @checker.exploit(0)
 async def exploit_user_note(task: ExploitCheckerTaskMessage, searcher: FlagSearcher, client: AsyncClient, logger: LoggerAdapter) -> Optional[str]:
-    username = json.loads(task.attack_info)["username"] # type: ignore
+    username = json.loads(task.attack_info)["username"]  # type: ignore
     department = faker.bs()
 
     (employee, cookie) = await register_user(client, username, department, None, logger)
     account = await update_note(client, "foo", logger)
 
-    flag = searcher.search_flag(account.note) # type: ignore
+    flag = searcher.search_flag(account.note)  # type: ignore
     if flag:
         return flag.decode()
 
@@ -266,7 +266,7 @@ async def exploit_user_note(task: ExploitCheckerTaskMessage, searcher: FlagSearc
 
 @checker.exploit(1)
 async def exploit_project_name(task: ExploitCheckerTaskMessage, searcher: FlagSearcher, client: AsyncClient, logger: LoggerAdapter) -> Optional[str]:
-    project_id = json.loads(task.attack_info)["projectId"] # type: ignore
+    project_id = json.loads(task.attack_info)["projectId"]  # type: ignore
 
     (employee, _cookie) = await register_user(client, "Kevin", "Penispumpenshop24.de", None, logger)
     account = await set_capacity(client, employee.id, project_id, datetime.now(), 0, logger)
@@ -280,7 +280,7 @@ async def exploit_project_name(task: ExploitCheckerTaskMessage, searcher: FlagSe
 
 @checker.exploit(2)
 async def exploit_booking_file(task: ExploitCheckerTaskMessage, searcher: FlagSearcher, client: AsyncClient, logger: LoggerAdapter) -> Optional[str]:
-    project_id = json.loads(task.attack_info)["projectId"] # type: ignore
+    project_id = json.loads(task.attack_info)["projectId"]  # type: ignore
 
     booking = await download_booking(client, f"/Uploads/{project_id}_00000000-0000-0000-0000-000000000000.csv", logger)
 
