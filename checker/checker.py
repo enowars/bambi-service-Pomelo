@@ -3,7 +3,7 @@ import json
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from logging import  LoggerAdapter
+from logging import LoggerAdapter
 from typing import Optional, Tuple
 
 from dataclasses_json import LetterCase, dataclass_json
