@@ -223,7 +223,7 @@ async def putflag_user_note(task: PutflagCheckerTaskMessage, session0: AsyncClie
     await db.set("projectName", project_name)
 
     username1 = create_user_name()
-    (employee1, cookie0) = await register_user(session1, username1, department, task.flag, logger)
+    (employee1, cookie1) = await register_user(session1, username1, department, task.flag, logger)
     flag_employee = await get_employee(session1, employee0.id, logger)
     assert_equals(task.flag, flag_employee.note, "Could not find flag in note")
 
@@ -244,7 +244,7 @@ async def getflag_user_note(task: GetflagCheckerTaskMessage, session0: AsyncClie
     assert_equals(task.flag, account.note, "Could not find flag in user note")
 
     username1 = create_user_name()
-    (employee1, cookie0) = await register_user(session1, username1, department, task.flag, logger)
+    (employee1, cookie1) = await register_user(session1, username1, department, task.flag, logger)
     flag_employee = await get_employee(session1, employeeId, logger)
     assert_equals(task.flag, flag_employee.note, "Could not find flag in note")
 
@@ -253,21 +253,24 @@ async def getflag_user_note(task: GetflagCheckerTaskMessage, session0: AsyncClie
 async def putflag_project_name(task: PutflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> str:
     username0 = create_user_name()
     department = create_department_name()
-    (employee0, cookie0) = await register_user(session0, username0, department, None, logger)
+    (_employee0, cookie0) = await register_user(session0, username0, department, None, logger)
     await db.set("cookie0", cookie0)
+    await db.set("department", department)
 
     begin = create_project_begin()
     end = create_project_end()
     project = await create_project(session0, task.flag, begin, end, logger)
     await db.set("projectId", project.id)
+    assert_equals(task.flag, project.name, "Could not find flag in project name")
 
     return json.dumps({"username": username0, "projectId": project.id,})
 
 
 @checker.getflag(1)
-async def getflag_project_name(task: GetflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> None:
+async def getflag_project_name(task: GetflagCheckerTaskMessage, session0: AsyncClient, session1: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> None:
     try:
         cookie0 = await db.get("cookie0")
+        department = await db.get("department")
         project_id = await db.get("projectId")
     except KeyError:
         raise MumbleException("Missing results from putflag")
@@ -276,8 +279,12 @@ async def getflag_project_name(task: GetflagCheckerTaskMessage, session0: AsyncC
     # TODO assert project is still in department?
 
     project = await get_project(session0, project_id, logger)
-    assert_equals(task.flag, project.name, "Could not find flag in user note")
-    # TODO also check department results from other account
+    assert_equals(task.flag, project.name, "Could not find flag in note")
+
+    username1 = create_user_name()
+    (employee1, cookie1) = await register_user(session1, username1, department, task.flag, logger)
+    project1 = await get_project(session1, project_id, logger)
+    assert_equals(task.flag, project1.name, "Could not find flag in note")
 
 
 @checker.putflag(2)
@@ -306,7 +313,7 @@ async def getflag_booking(task: GetflagCheckerTaskMessage, session0: AsyncClient
     except KeyError:
         raise MumbleException("Missing results from putflag")
 
-    # TODO assert project is still in department
+    # TODO assert project is still in department?
 
     booking = await download_booking(session0, booking_url, logger)
     assert_equals(booking.split("\n")[0], task.flag, "Could not find booking file")
