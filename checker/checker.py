@@ -1,8 +1,7 @@
 import io
 import json
-import time
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from logging import LoggerAdapter
 from typing import Optional, Tuple
 
@@ -35,6 +34,50 @@ class ProjectDto:
     begin: str
     end: str
     delivered_hours_timestamp: str
+
+
+def create_user_name() -> str:
+    return faker.name() + faker.md5(raw_output=False)
+
+
+def create_department_name() -> str:
+    return faker.bs() + faker.md5(raw_output=False)
+
+
+def create_project_name() -> str:
+    return faker.catch_phrase()
+
+
+def create_user_agent() -> str:
+    return faker.user_agent()
+
+
+def create_project_begin() -> str:
+    utcnow = datetime.utcnow()
+    d = datetime(
+        utcnow.year,
+        utcnow.month - 1,
+        utcnow.day,
+        0,
+        0,
+        0,
+        0,
+        timezone.utc)
+    return d.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def create_project_end() -> str:
+    utcnow = datetime.utcnow()
+    d = datetime(
+        utcnow.year,
+        utcnow.month + 1,
+        utcnow.day,
+        0,
+        0,
+        0,
+        0,
+        timezone.utc)
+    return d.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 async def register_user(client: AsyncClient, employeeName: str, department: str, note: Optional[str], logger: LoggerAdapter) -> Tuple[EmployeeDto, str]:
@@ -76,6 +119,24 @@ async def get_account(client: AsyncClient, logger: LoggerAdapter) -> EmployeeDto
     return account
 
 
+async def get_employee(client: AsyncClient, id: int, logger: LoggerAdapter) -> EmployeeDto:
+    try:
+        logger.debug(f"get_employee({id})")
+        response = await client.get(f"/api/account/employee?employeeId={id}")
+        logger.debug(f"{response.status_code} {response.text}")
+    except RequestError:
+        raise MumbleException("/api/account/employee request error")
+
+    assert_equals(response.status_code, 200, "GET /api/account/employee failed")
+
+    try:
+        account = EmployeeDto.from_json(response.text)  # type: ignore
+    except:
+        raise MumbleException("GET /api/account/employee returned unexpected data")
+
+    return account
+
+
 async def update_note(client: AsyncClient, note: str, logger: LoggerAdapter) -> EmployeeDto:
     try:
         logger.debug(f"update_note({note})")
@@ -93,7 +154,7 @@ async def update_note(client: AsyncClient, note: str, logger: LoggerAdapter) -> 
     return account
 
 
-async def create_project(client: AsyncClient, name: str, begin: datetime, end: datetime, logger: LoggerAdapter) -> ProjectDto:
+async def create_project(client: AsyncClient, name: str, begin: str, end: str, logger: LoggerAdapter) -> ProjectDto:
     try:
         logger.debug(f"create_project({name}, {begin}, {end})")
         response = await client.post("/api/project/project", data={"name": name, "begin": begin, "end": end})
@@ -165,36 +226,54 @@ async def download_booking(client: AsyncClient, url: str, logger: LoggerAdapter)
 
 
 @checker.putflag(0)
-async def putflag_user_note(task: PutflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> str:
-    username0 = faker.name() + str(time.time())
-    department = faker.bs()
-    (_employee0, cookie0) = await register_user(session0, username0, department, task.flag, logger)
+async def putflag_user_note(task: PutflagCheckerTaskMessage, session0: AsyncClient, session1: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> str:
+    username0 = create_user_name()
+    department = create_department_name()
+    project_name = create_project_name()
+    (employee0, cookie0) = await register_user(session0, username0, department, task.flag, logger)
+    assert_equals(task.flag, employee0.note, "Could not find flag in note")
+    project = await create_project(session0, project_name, create_project_begin(), create_project_end(), logger)
     await db.set("cookie0", cookie0)
-    return json.dumps({"username": username0,})
+    await db.set("employeeId", employee0.id)
+    await db.set("department", department)
+    await db.set("projectName", project_name)
+
+    username1 = create_user_name()
+    (employee1, cookie0) = await register_user(session1, username1, department, task.flag, logger)
+    flag_employee = await get_employee(session1, employee0.id, logger)
+    assert_equals(task.flag, flag_employee.note, "Could not find flag in note")
+
+    return json.dumps({"username": username0, "projectId": project.id,})
 
 
 @checker.getflag(0)
-async def getflag_user_note(task: GetflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> None:
+async def getflag_user_note(task: GetflagCheckerTaskMessage, session0: AsyncClient, session1: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> None:
     try:
         cookie0 = await db.get("cookie0")
+        employeeId = await db.get("employeeId")
+        department = await db.get("department")
     except KeyError:
         raise MumbleException("Missing results from putflag")
 
     session0.cookies.set(COOKIE_NAME, cookie0)
     account = await get_account(session0, logger)
     assert_equals(task.flag, account.note, "Could not find flag in user note")
-    # TODO also check department results from other account
+
+    username1 = create_user_name()
+    (employee1, cookie0) = await register_user(session1, username1, department, task.flag, logger)
+    flag_employee = await get_employee(session1, employeeId, logger)
+    assert_equals(task.flag, flag_employee.note, "Could not find flag in note")
 
 
 @checker.putflag(1)
 async def putflag_project_name(task: PutflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> str:
-    username0 = faker.name() + str(time.time())
-    department = faker.bs()
+    username0 = create_user_name()
+    department = create_department_name()
     (employee0, cookie0) = await register_user(session0, username0, department, None, logger)
     await db.set("cookie0", cookie0)
 
-    begin = datetime.now()
-    end = datetime.now()
+    begin = create_project_begin()
+    end = create_project_end()
     project = await create_project(session0, task.flag, begin, end, logger)
     await db.set("projectId", project.id)
 
@@ -219,14 +298,14 @@ async def getflag_project_name(task: GetflagCheckerTaskMessage, session0: AsyncC
 
 @checker.putflag(2)
 async def putflag_booking(task: PutflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> str:
-    username0 = faker.name() + str(time.time())
-    department = faker.bs()
+    username0 = create_user_name()
+    department = create_department_name()
     (employee0, cookie0) = await register_user(session0, username0, department, None, logger)
     await db.set("cookie0", cookie0)
     await db.set("department", department)
 
-    begin = datetime.now()
-    end = datetime.now()
+    begin = create_project_begin()
+    end = create_project_end()
     project = await create_project(session0, task.flag, begin, end, logger)
     await db.set("projectId", project.id)
 

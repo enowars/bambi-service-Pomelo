@@ -5,7 +5,6 @@
     <table>
       <thead>
         <tr>
-          <td>Cal. Week</td>
           <td>Begin</td>
           <td>Reserve</td>
           <td v-for="employeeProjectHours in this.employee.employeeProjectHours" :key="employeeProjectHours.employeeId + '_' + employeeProjectHours.projectId">
@@ -15,7 +14,6 @@
       </thead>
       <tbody>
         <tr v-for="week in this.weeks" :key="week.begin">
-          <td>0</td>
           <td>{{ week.begin }}</td>
           <td>0</td>
           <td v-for="weeklyProjectCapacity in week.capacities" :key="weeklyProjectCapacity.projectId" v-on:change="onInput(weeklyProjectCapacity)">
@@ -64,6 +62,14 @@ export default defineComponent({
       var begin = new Date()
       begin.setUTCHours(0, 0, 0, 0)
       begin = getLastMonday(begin)
+
+      var test = new Date()
+      test.setUTCHours(0, 0, 0, 0)
+      test = getLastMonday(begin)
+      for (var x = 0; x < 6; x++) {
+        console.log(test.toUTCString())
+        test = addDays(test, 7)
+      }
 
       for (var i = 0; i < 12; i++) {
         // build a week

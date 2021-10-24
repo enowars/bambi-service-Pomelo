@@ -6,7 +6,5 @@ export const getLastMonday = (dt: Date) : Date => {
 }
 
 export function addDays(date: Date, days: number) : Date {
-  const newDate = new Date(date)
-  newDate.setDate(newDate.getDate() + days)
-  return newDate
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + days, 0, 0, 0))
 }
