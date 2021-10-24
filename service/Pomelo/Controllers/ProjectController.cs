@@ -29,7 +29,7 @@
             var userId = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
             {
-                return this.Unauthorized();
+                return this.Unauthorized(string.Empty);
             }
 
             var dbUser = await this.dbContext.Employees
@@ -50,7 +50,7 @@
             var userId = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
             {
-                return this.Unauthorized();
+                return this.Unauthorized(string.Empty);
             }
 
             var dbUser = await this.dbContext.Employees
@@ -77,7 +77,7 @@
             var userId = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
             {
-                return this.Forbid();
+                return this.Unauthorized(string.Empty);
             }
 
             var dbUser = await this.dbContext.Employees

@@ -7,8 +7,6 @@
           <td>Name</td>
           <td>Begin</td>
           <td>End</td>
-          <td>Absolute Deviation</td>
-          <td>Relative Deviation</td>
         </tr>
       </thead>
       <tbody>
@@ -16,8 +14,6 @@
           <td><router-link :to="{name: 'Project', params: { projectId: project.id }}">{{ project.name }}</router-link></td>
           <td>{{ project.begin }}</td>
           <td>{{ project.end }}</td>
-          <td>0</td>
-          <td>0</td>
         </tr>
       </tbody>
     </table>

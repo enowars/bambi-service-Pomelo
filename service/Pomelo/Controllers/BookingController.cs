@@ -31,7 +31,7 @@
             var dep = this.HttpContext.User.FindFirst(ClaimTypes.GroupSid)?.Value;
             if (user == null || dep == null)
             {
-                return this.Unauthorized();
+                return this.Unauthorized(string.Empty);
             }
 
             var project = await this.dbContext.Projects

@@ -8,8 +8,6 @@
           <td>Name</td>
           <td>Total Hours</td>
           <td>Performed Hours</td>
-          <td>Absolute Deviation</td>
-          <td>Relative Deviation</td>
         </tr>
       </thead>
       <tbody>
@@ -18,8 +16,6 @@
           <td><router-link :to="{name: 'EmployeePage', params: { employeeId: hours.employeeId }}">{{ this.getName(hours.employeeId) }}</router-link></td>
           <td>{{ hours.totalHours }}</td>
           <td>{{ hours.deliveredHours }}</td>
-          <td>0</td>
-          <td>0</td>
         </tr>
       </tbody>
     </table>
@@ -32,7 +28,7 @@
         </option>
       </select>
       <input type="number" v-model="newHours" placeholder="total hours">
-      <button @click="this.add()">Add</button>
+      <button @click="this.add()">Set</button>
     </div>
 
     <div name="visualization" style="height: 400px;">
@@ -126,12 +122,10 @@ export default defineComponent({
           weekBegin.toString(),
           predictedRemainingHours
         ])
-        var pwc = project.employeeProjectWeeklyCapacities
-          .filter(wpc => new Date(Date.parse(wpc.start + 'Z')).getTime() === weekBegin.getTime())[0]
+        predictedRemainingHours -= project.employeeProjectWeeklyCapacities
+          .filter(wpc => new Date(Date.parse(wpc.start + 'Z')).getTime() === weekBegin.getTime())
+          .reduce((sum, e) => sum + e.capacity, 0)
 
-        if (pwc) {
-          predictedRemainingHours -= (pwc.capacity / 100) * 40
-        }
         weekBegin = addDays(weekBegin, 7)
       }
       // console.log(plannedHours)
