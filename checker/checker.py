@@ -54,29 +54,13 @@ def create_user_agent() -> str:
 
 def create_project_begin() -> str:
     utcnow = datetime.utcnow()
-    d = datetime(
-        utcnow.year,
-        utcnow.month - 1,
-        utcnow.day,
-        0,
-        0,
-        0,
-        0,
-        timezone.utc)
+    d = datetime(utcnow.year, utcnow.month - 1, utcnow.day, 0, 0, 0, 0, timezone.utc)
     return d.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 def create_project_end() -> str:
     utcnow = datetime.utcnow()
-    d = datetime(
-        utcnow.year,
-        utcnow.month + 1,
-        utcnow.day,
-        0,
-        0,
-        0,
-        0,
-        timezone.utc)
+    d = datetime(utcnow.year, utcnow.month + 1, utcnow.day, 0, 0, 0, 0, timezone.utc)
     return d.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
