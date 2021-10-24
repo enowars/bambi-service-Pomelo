@@ -45,28 +45,7 @@
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<EmployeeDto>>> Department()
-        {
-            this.logger.LogInformation($"GET Department");
-            var user = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (user == null)
-            {
-                return this.Unauthorized();
-            }
-
-            var employee = await this.dbContext.Employees
-                .Where(e => e.Id == long.Parse(user))
-                .SingleAsync(this.HttpContext.RequestAborted);
-
-            var department = await this.dbContext.Employees
-                .Where(e => e.Department == employee.Department)
-                .ToArrayAsync(this.HttpContext.RequestAborted);
-
-            return department.Select(e => new EmployeeDto(e)).ToList();
-        }
-
-        [HttpGet]
-        public async Task<ActionResult<EmployeeDto>> Employee(long employeeId)
+        public async Task<ActionResult<EmployeeDetailsDto>> Employee(long employeeId)
         {
             var user = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (user == null)
@@ -90,16 +69,36 @@
             }
 
             employee.EmployeeProjectHours = await this.dbContext.EmployeeProjectHours
-                .Where(tp => tp.EmployeeId == dbUser.Id)
+                .Where(tp => tp.EmployeeId == employeeId)
                 .AsNoTracking()
                 .ToListAsync(this.HttpContext.RequestAborted);
 
             employee.EmployeeProjectWeeklyCapacities = await this.dbContext.EmployeeProjectWeeklyCapacities
-                .Where(wc => wc.EmployeeId == dbUser.Id)
+                .Where(wc => wc.EmployeeId == employeeId)
                 .AsNoTracking()
                 .ToListAsync(this.HttpContext.RequestAborted);
 
-            return new EmployeeDto(employee);
+            return new EmployeeDetailsDto(employee);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<EmployeeDto>>> Employees()
+        {
+            var user = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (user == null)
+            {
+                return this.Unauthorized();
+            }
+
+            var dbUser = await this.dbContext.Employees
+                .Where(e => e.Id == long.Parse(user))
+                .AsNoTracking()
+                .SingleAsync(this.HttpContext.RequestAborted);
+
+            return await this.dbContext.Employees
+                .Where(e => e.Department == dbUser.Department) // TODO index
+                .Select(e => new EmployeeDto(e))
+                .ToListAsync(this.HttpContext.RequestAborted);
         }
 
         [HttpPost]

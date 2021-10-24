@@ -68,7 +68,7 @@
                 return this.Forbid();
             }
 
-            return await this.GetProject(projectId);
+            return await this.GetProjectDto(projectId);
         }
 
         [HttpPost]
@@ -93,7 +93,7 @@
             };
             this.dbContext.Projects.Add(newProject);
             await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
-            return await this.GetProject(newProject.Id);
+            return await this.GetProjectDto(newProject.Id);
         }
 
         [HttpPost]
@@ -124,7 +124,7 @@
             }
 
             await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
-            return this.Json(project);
+            return await this.GetProjectDto(projectId);
         }
 
         [HttpPost]
@@ -154,10 +154,10 @@
             }
 
             await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
-            return await this.GetProject(projectId);
+            return await this.GetProjectDto(projectId);
         }
 
-        private async Task<ProjectDto> GetProject(long projectId)
+        private async Task<ProjectDto> GetProjectDto(long projectId)
         {
             var project = await this.dbContext.Projects
                 .Where(p => p.Id == projectId)

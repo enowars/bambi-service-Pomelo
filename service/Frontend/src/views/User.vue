@@ -8,7 +8,7 @@
           <td>Cal. Week</td>
           <td>Begin</td>
           <td>Reserve</td>
-          <td v-for="employeeProjectHours in this.employee.employeeProjectHours" :key="employeeProjectHours.id">
+          <td v-for="employeeProjectHours in this.employee.employeeProjectHours" :key="employeeProjectHours.employeeId + '_' + employeeProjectHours.projectId">
             {{ this.getProjectName(employeeProjectHours.projectId) }}
           </td>
         </tr>
@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { Employee, getAccountInfo, getAccountUserData, getProjectDepartmentProjects, postWeeklyProjectCapacity, Project, EmployeeProjectWeeklyCapacity } from '@/services/pomeloAPI'
+import { getEmployee, getProjectDepartmentProjects, postWeeklyProjectCapacity, Project, EmployeeProjectWeeklyCapacityDto, EmployeeDetails } from '@/services/pomeloAPI'
 import { addDays, getLastMonday } from '@/util'
 import { defineComponent, inject } from 'vue'
 import { useRoute } from 'vue-router'
@@ -38,7 +38,7 @@ import { useRoute } from 'vue-router'
 interface Week {
   begin: string,
   reserve: 0,
-  capacities: EmployeeProjectWeeklyCapacity[]
+  capacities: EmployeeProjectWeeklyCapacityDto[]
 }
 
 export default defineComponent({
@@ -46,7 +46,7 @@ export default defineComponent({
   data() {
     return {
       employeeId: Number(useRoute().params.employeeId),
-      employee: null as Employee | null,
+      employee: null as EmployeeDetails | null,
       projects: [] as Project[],
       weeks: [] as Week[]
     }
@@ -55,11 +55,11 @@ export default defineComponent({
     this.init()
   },
   methods: {
-    async onInput(capacity: EmployeeProjectWeeklyCapacity) {
+    async onInput(capacity: EmployeeProjectWeeklyCapacityDto) {
       await postWeeklyProjectCapacity(this.employeeId, capacity.projectId, capacity.start, capacity.capacity)
     },
     async init() {
-      this.employee = await getAccountUserData(this.employeeId)
+      this.employee = await getEmployee(this.employeeId)
       this.projects = await getProjectDepartmentProjects()
       var begin = new Date()
       begin.setUTCHours(0, 0, 0, 0)
@@ -81,12 +81,11 @@ export default defineComponent({
             week.capacities.push(upstreamCapacity)
           } else {
             week.capacities.push({
-              id: 0,
               employeeId: this.employeeId,
               projectId: plannedHours.projectId,
               start: begin.toUTCString(),
               capacity: 0
-            } as EmployeeProjectWeeklyCapacity)
+            } as EmployeeProjectWeeklyCapacityDto)
           }
         }
         this.weeks.push(week)

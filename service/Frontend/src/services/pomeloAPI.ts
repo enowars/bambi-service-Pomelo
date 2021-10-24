@@ -1,26 +1,31 @@
 export interface EmployeeProjectHours {
-  id: number,
   employeeId: number,
   projectId: number,
   totalHours: number,
   deliveredHours: number
 }
 
-export interface EmployeeProjectWeeklyCapacity {
-  id: number,
+export interface EmployeeProjectWeeklyCapacityDto {
   employeeId: number,
   projectId: number,
   start: string,
   capacity: number
 }
 
-export interface Employee {
+export interface EmployeeDto {
+  id: number,
+  name: string,
+  department: string,
+  note: string | null,
+}
+
+export interface EmployeeDetails {
   id: number,
   name: string,
   department: string,
   note: string | null,
   employeeProjectHours: EmployeeProjectHours[],
-  employeeProjectWeeklyCapacities: EmployeeProjectWeeklyCapacity[]
+  employeeProjectWeeklyCapacities: EmployeeProjectWeeklyCapacityDto[]
 }
 
 export interface Project {
@@ -29,26 +34,63 @@ export interface Project {
   begin: string,
   end: string,
   employeeProjectHours: EmployeeProjectHours[],
-  employeeProjectWeeklyCapacities: EmployeeProjectWeeklyCapacity[],
+  employeeProjectWeeklyCapacities: EmployeeProjectWeeklyCapacityDto[],
   deliveredHoursTimestamp: string
 }
 
-export const getAccountInfo = async () : Promise<Employee | null> => {
+// Account Controller
+export const getAccount = async () : Promise<EmployeeDto | null> => {
   try {
-    return await (await fetch('/api/account/info')).json() as Employee
+    return await (await fetch('/api/account/account')).json() as EmployeeDto
   } catch {
     return null
   }
 }
 
-export const postAccountRegister = async (employeeName: string, department: string) : Promise<Employee> => {
+export const getEmployee = async (employeeId: number) : Promise<EmployeeDetails> => {
+  return await fetch('/api/account/employee?employeeId=' + employeeId, {
+    method: 'GET'
+  }).then(val => val.json()) as EmployeeDetails
+}
+
+export const getEmployees = async () : Promise<EmployeeDto[]> => {
+  return await fetch('/api/account/employees', {
+    method: 'GET'
+  }).then(val => val.json()) as EmployeeDto[]
+}
+
+export const getAccountDepartment = async () : Promise<EmployeeDetails[]> => {
+  return await fetch('/api/account/employees', {
+    method: 'GET'
+  }).then(val => val.json()) as EmployeeDetails[]
+}
+
+export const postRegister = async (employeeName: string, department: string, note: string | null) : Promise<EmployeeDetails> => {
   const form = new FormData()
   form.append('employeeName', employeeName)
   form.append('department', department)
+  if (note != null) {
+    form.append('note', note)
+  }
   return await fetch('/api/account/register', {
     method: 'POST',
     body: form
-  }).then(val => val.json()) as Employee
+  }).then(val => val.json()) as EmployeeDetails
+}
+
+// Booking Controller
+
+// Project Controller
+export const getProjectDepartmentProjects = async () : Promise<Project[]> => {
+  return await fetch('/api/project/projects', {
+    method: 'GET'
+  }).then(val => val.json()) as Project[]
+}
+
+export const getProjectDetails = async (projectId: number) : Promise<Project> => {
+  return await fetch('/api/project/project?projectId=' + projectId, {
+    method: 'GET'
+  }).then(val => val.json()) as Project
 }
 
 export const postProjectCreate = async (projectName: string, begin: Date, end: Date) : Promise<Project | null> => {
@@ -57,31 +99,13 @@ export const postProjectCreate = async (projectName: string, begin: Date, end: D
   form.append('begin', begin.toUTCString())
   form.append('end', end.toUTCString())
   try {
-    return await fetch('/api/project/create', {
+    return await fetch('/api/project/project', {
       method: 'POST',
       body: form
     }).then(val => val.json()) as Project
   } catch {
     return null
   }
-}
-
-export const getProjectDepartmentProjects = async () : Promise<Project[]> => {
-  return await fetch('/api/project/departmentprojects', {
-    method: 'GET'
-  }).then(val => val.json()) as Project[]
-}
-
-export const getProjectDetails = async (projectId: number) : Promise<Project> => {
-  return await fetch('/api/project/details?projectId=' + projectId, {
-    method: 'GET'
-  }).then(val => val.json()) as Project
-}
-
-export const getAccountDepartment = async () : Promise<Employee[]> => {
-  return await fetch('/api/account/department', {
-    method: 'GET'
-  }).then(val => val.json()) as Employee[]
 }
 
 export const postProjectTotalPlanning = async (employeeId: number, projectId: number, hours: number) : Promise<EmployeeProjectHours | null> => {
@@ -93,19 +117,13 @@ export const postProjectTotalPlanning = async (employeeId: number, projectId: nu
   form.append('projectId', projectId.toString())
   form.append('hours', hours.toString())
   try {
-    return await fetch('/api/project/totalplanning', {
+    return await fetch('/api/project/hours', {
       method: 'POST',
       body: form
     }).then(val => val.json()) as EmployeeProjectHours
   } catch {
     return null
   }
-}
-
-export const getAccountUserData = async (employeeId: number) : Promise<Employee> => {
-  return await fetch('/api/account/userdata?employeeId=' + employeeId, {
-    method: 'GET'
-  }).then(val => val.json()) as Employee
 }
 
 export const postWeeklyProjectCapacity = async (employeeId: number, projectId: number, start: string, capacity: number) : Promise<void> => {
@@ -115,7 +133,7 @@ export const postWeeklyProjectCapacity = async (employeeId: number, projectId: n
   form.append('start', start)
   form.append('capacity', capacity.toString())
   try {
-    await fetch('/api/project/weeklyprojectcapacity', {
+    await fetch('/api/project/capacity', {
       method: 'POST',
       body: form
     })

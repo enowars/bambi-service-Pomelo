@@ -13,7 +13,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="hours in this.project.employeeProjectHours" :key="hours.id">
+        <tr v-for="hours in this.project.employeeProjectHours" :key="hours.employeeId + '_' + hours.projectId">
           <!--<td><router-link :to="{name: 'User', params: { employeeId: hours.employeeId }}">{{ getName(hours.employeeId) }}</router-link></td>-->
           <td><router-link :to="{name: 'EmployeePage', params: { employeeId: hours.employeeId }}">{{ this.getName(hours.employeeId) }}</router-link></td>
           <td>{{ hours.totalHours }}</td>
@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { Project, getProjectDetails, Employee, getAccountDepartment, postProjectTotalPlanning } from '@/services/pomeloAPI'
+import { Project, getProjectDetails, EmployeeDto, getAccountDepartment, postProjectTotalPlanning } from '@/services/pomeloAPI'
 import { getLastMonday, addDays } from '@/util'
 import { defineComponent } from 'vue'
 import { useRoute } from 'vue-router'
@@ -53,10 +53,10 @@ export default defineComponent({
     return {
       projectId: Number(useRoute().params.projectId),
       project: null as Project | null,
-      departmentEmployees: [] as Employee[],
-      uninvolvedEmployees: [] as Employee[],
+      departmentEmployees: [] as EmployeeDto[],
+      uninvolvedEmployees: [] as EmployeeDto[],
       eph: null as number | null,
-      newEmployee: null as Employee | null,
+      newEmployee: null as EmployeeDto | null,
       newHours: null as number | null,
       burnDownChartData: null as any
     }

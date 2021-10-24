@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { postAccountRegister } from '@/services/pomeloAPI'
+import { postRegister } from '@/services/pomeloAPI'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -22,7 +22,7 @@ export default defineComponent({
   methods: {
     async register() {
       if (this.name != null && this.department != null) {
-        const employee = await postAccountRegister(this.name, this.department)
+        const employee = await postRegister(this.name, this.department, null)
         this.$router.push({ name: 'Overview' })
       }
     }

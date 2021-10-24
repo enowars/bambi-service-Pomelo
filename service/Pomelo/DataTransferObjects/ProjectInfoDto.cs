@@ -6,6 +6,7 @@
     using Pomelo.Models;
 
     public record ProjectInfoDto(
+        long Id,
         string Name,
         DateTime Begin,
         DateTime End,
@@ -13,6 +14,7 @@
     {
         public ProjectInfoDto(Project project)
             : this(
+                  project.Id,
                   project.Name,
                   project.Begin,
                   project.End,

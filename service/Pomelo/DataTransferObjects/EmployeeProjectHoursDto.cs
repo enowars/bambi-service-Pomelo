@@ -4,14 +4,14 @@
 
     public record EmployeeProjectHoursDto(
         long EmployeeId,
-        string EmployeeName,
+        long ProjectId,
         long TotalHours,
         long DeliveredHours)
     {
         public EmployeeProjectHoursDto(EmployeeProjectHours eph)
             : this(
                   eph.EmployeeId,
-                  eph.Employee.Name,
+                  eph.ProjectId,
                   eph.TotalHours,
                   eph.DeliveredHours)
         {

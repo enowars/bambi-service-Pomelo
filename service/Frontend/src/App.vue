@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { getAccountInfo } from './services/pomeloAPI'
+import { getAccount } from './services/pomeloAPI'
 
 export default defineComponent({
   created() {
@@ -15,7 +15,7 @@ export default defineComponent({
   },
   methods: {
     async init() {
-      const accountInfo = await getAccountInfo()
+      const accountInfo = await getAccount()
       if (accountInfo === null) {
         this.$router.push({ name: 'Register' })
       } else {
