@@ -79,6 +79,15 @@ export const postRegister = async (employeeName: string, department: string, not
 }
 
 // Booking Controller
+export const postBooking = async (projectId: number, file: File) : Promise<[boolean, string]> => {
+  const form = new FormData()
+  form.append('file', file)
+  const reponse = await fetch('/api/booking/upload?projectId=' + projectId, {
+    method: 'POST',
+    body: form
+  })
+  return [reponse.status === 200, await reponse.text()]
+}
 
 // Project Controller
 export const getProjectDepartmentProjects = async () : Promise<Project[]> => {

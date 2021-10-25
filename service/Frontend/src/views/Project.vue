@@ -31,6 +31,12 @@
       <button @click="this.add()">Set</button>
     </div>
 
+    <div>
+      <h4>Upload Performed Hours</h4>
+      <input type="file" @change="onBookingFileChange($event)" />
+      <button v-on:click="submitBooking()">Submit</button>
+    </div>
+
     <div name="visualization" style="height: 400px;">
       <apexchart height="100%" v-if="this.burnDownChartData" type="line" :options="this.burnDownChartData.options" :series="this.burnDownChartData.series"></apexchart>
     </div>
@@ -38,7 +44,7 @@
 </template>
 
 <script lang="ts">
-import { Project, getProjectDetails, EmployeeDto, getAccountDepartment, postProjectTotalPlanning } from '@/services/pomeloAPI'
+import { Project, getProjectDetails, EmployeeDto, getAccountDepartment, postProjectTotalPlanning, postBooking } from '@/services/pomeloAPI'
 import { getLastMonday, addDays } from '@/util'
 import { defineComponent } from 'vue'
 import { useRoute } from 'vue-router'
@@ -54,7 +60,8 @@ export default defineComponent({
       eph: null as number | null,
       newEmployee: null as EmployeeDto | null,
       newHours: null as number | null,
-      burnDownChartData: null as any
+      burnDownChartData: null as any,
+      bookingFile: null as File | null
     }
   },
   created() {
@@ -170,6 +177,20 @@ export default defineComponent({
             size: 5
           }
         }
+      }
+    },
+    onBookingFileChange(event: Event) {
+      const target = event.target as HTMLInputElement
+      this.bookingFile = target.files![0]
+    },
+    async submitBooking() {
+      if (this.bookingFile) {
+        var response = await postBooking(this.projectId, this.bookingFile)
+        if (!response[0]) {
+          alert(response[1])
+        }
+      } else {
+        console.log('no file selected')
       }
     }
   }
