@@ -64,10 +64,15 @@ def create_project_end() -> str:
     return d.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
+def get_user_agent() -> str:
+    return faker.user_agent()
+
+
 async def register_user(client: AsyncClient, employeeName: str, department: str, note: Optional[str], logger: LoggerAdapter) -> Tuple[EmployeeDto, str]:
     try:
         logger.debug(f"register_user({employeeName}, {department}")
-        response = await client.post("/api/account/register", data={"employeeName": employeeName, "department": department, "note": note})
+        headers = {'User-Agent': get_user_agent()}
+        response = await client.post("/api/account/register", data={"employeeName": employeeName, "department": department, "note": note}, headers=headers)
         logger.debug(f"{response.status_code} {response.text}")
     except RequestError:
         raise MumbleException("/api/account/register request error")
@@ -88,7 +93,8 @@ async def register_user(client: AsyncClient, employeeName: str, department: str,
 async def get_account(client: AsyncClient, logger: LoggerAdapter) -> EmployeeDto:
     try:
         logger.debug("get_account()")
-        response = await client.get("/api/account/account")
+        headers = {'User-Agent': get_user_agent()}
+        response = await client.get("/api/account/account", headers=headers)
         logger.debug(f"{response.status_code} {response.text}")
     except RequestError:
         raise MumbleException("/api/account/account request error")
@@ -106,7 +112,8 @@ async def get_account(client: AsyncClient, logger: LoggerAdapter) -> EmployeeDto
 async def get_employee(client: AsyncClient, id: int, logger: LoggerAdapter) -> EmployeeDto:
     try:
         logger.debug(f"get_employee({id})")
-        response = await client.get(f"/api/account/employee?employeeId={id}")
+        headers = {'User-Agent': get_user_agent()}
+        response = await client.get(f"/api/account/employee?employeeId={id}", headers=headers)
         logger.debug(f"{response.status_code} {response.text}")
     except RequestError:
         raise MumbleException("/api/account/employee request error")
@@ -124,7 +131,8 @@ async def get_employee(client: AsyncClient, id: int, logger: LoggerAdapter) -> E
 async def update_note(client: AsyncClient, note: str, logger: LoggerAdapter) -> EmployeeDto:
     try:
         logger.debug(f"update_note({note})")
-        response = await client.post("/api/account/note", data={"note": note})
+        headers = {'User-Agent': get_user_agent()}
+        response = await client.post("/api/account/note", data={"note": note}, headers=headers)
         logger.debug(f"{response.status_code} {response.text}")
     except RequestError:
         raise MumbleException("/api/account/note request error")
@@ -141,7 +149,8 @@ async def update_note(client: AsyncClient, note: str, logger: LoggerAdapter) -> 
 async def create_project(client: AsyncClient, name: str, begin: str, end: str, logger: LoggerAdapter) -> ProjectDto:
     try:
         logger.debug(f"create_project({name}, {begin}, {end})")
-        response = await client.post("/api/project/project", data={"name": name, "begin": begin, "end": end})
+        headers = {'User-Agent': get_user_agent()}
+        response = await client.post("/api/project/project", data={"name": name, "begin": begin, "end": end}, headers=headers)
         logger.debug(f"{response.status_code} {response.text}")
     except RequestError:
         raise MumbleException("/api/project/project request error")
@@ -158,7 +167,8 @@ async def create_project(client: AsyncClient, name: str, begin: str, end: str, l
 async def get_project(client: AsyncClient, id: int, logger: LoggerAdapter) -> ProjectDto:
     try:
         logger.debug(f"get_project({id})")
-        response = await client.get(f"/api/project/project?projectId={id}")
+        headers = {'User-Agent': get_user_agent()}
+        response = await client.get(f"/api/project/project?projectId={id}", headers=headers)
         logger.debug(f"{response.status_code} {response.text}")
     except RequestError:
         raise MumbleException("/api/project/project request error")
@@ -175,7 +185,8 @@ async def get_project(client: AsyncClient, id: int, logger: LoggerAdapter) -> Pr
 
 async def set_capacity(client: AsyncClient, employee_id: int, project_id: int, start: datetime, capacity: int, logger: LoggerAdapter) -> ProjectDto:
     try:
-        response = await client.post("/api/project/capacity", data={"employeeId": employee_id, "projectId": project_id, "start": start, "capacity": capacity})
+        headers = {'User-Agent': get_user_agent()}
+        response = await client.post("/api/project/capacity", data={"employeeId": employee_id, "projectId": project_id, "start": start, "capacity": capacity}, headers=headers)
         logger.debug(f"{response.status_code} {response.text}")
     except RequestError:
         raise MumbleException("/api/project/capacity request error")
@@ -191,7 +202,8 @@ async def set_capacity(client: AsyncClient, employee_id: int, project_id: int, s
 
 async def upload_booking(client: AsyncClient, project_id: int, file: str, logger: LoggerAdapter) -> str:
     try:
-        response = await client.post(f"/api/booking/upload?projectId={project_id}", files={"file": io.StringIO(file)})
+        headers = {'User-Agent': get_user_agent()}
+        response = await client.post(f"/api/booking/upload?projectId={project_id}", files={"file": io.StringIO(file)}, headers=headers)
         logger.debug(f"{response.status_code} {response.text}")
     except RequestError:
         raise MumbleException("/api/booking/upload request error")
@@ -201,7 +213,8 @@ async def upload_booking(client: AsyncClient, project_id: int, file: str, logger
 
 async def download_booking(client: AsyncClient, url: str, logger: LoggerAdapter) -> str:
     try:
-        response = await client.get(url)
+        headers = {'User-Agent': get_user_agent()}
+        response = await client.get(url, headers=headers)
         logger.debug(f"{response.status_code} {response.text}")
     except RequestError:
         raise MumbleException("GET booking request error")
