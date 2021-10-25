@@ -9,14 +9,14 @@ using Pomelo.Database;
 namespace Pomelo.Migrations
 {
     [DbContext(typeof(PomeloDbContext))]
-    [Migration("20210829133850_m1")]
+    [Migration("20211025065836_m1")]
     partial class m1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.8");
+                .HasAnnotation("ProductVersion", "5.0.11");
 
             modelBuilder.Entity("Pomelo.Models.Employee", b =>
                 {
@@ -37,30 +37,28 @@ namespace Pomelo.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Department");
+
+                    b.HasIndex("Name");
+
                     b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("Pomelo.Models.EmployeeProjectHours", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("DeliveredHours")
-                        .HasColumnType("INTEGER");
-
                     b.Property<long>("EmployeeId")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("ProjectId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("DeliveredHours")
+                        .HasColumnType("INTEGER");
+
                     b.Property<long>("TotalHours")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
+                    b.HasKey("EmployeeId", "ProjectId");
 
                     b.HasIndex("ProjectId");
 
@@ -69,25 +67,19 @@ namespace Pomelo.Migrations
 
             modelBuilder.Entity("Pomelo.Models.EmployeeProjectWeeklyCapacity", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("Capacity")
-                        .HasColumnType("INTEGER");
-
                     b.Property<long>("EmployeeId")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("ProjectId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("Capacity")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("Start")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
+                    b.HasKey("EmployeeId", "ProjectId");
 
                     b.HasIndex("ProjectId");
 

@@ -8,8 +8,6 @@
     public class EmployeeProjectWeeklyCapacity
     {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        public long Id { get; set; }
-
         public long EmployeeId { get; set; }
 
         public Employee Employee { get; set; }

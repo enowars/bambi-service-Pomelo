@@ -51,8 +51,6 @@ namespace Pomelo.Migrations
                 name: "EmployeeProjectHours",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
                     EmployeeId = table.Column<long>(type: "INTEGER", nullable: false),
                     ProjectId = table.Column<long>(type: "INTEGER", nullable: false),
                     TotalHours = table.Column<long>(type: "INTEGER", nullable: false),
@@ -60,7 +58,7 @@ namespace Pomelo.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EmployeeProjectHours", x => x.Id);
+                    table.PrimaryKey("PK_EmployeeProjectHours", x => new { x.EmployeeId, x.ProjectId });
                     table.ForeignKey(
                         name: "FK_EmployeeProjectHours_Employees_EmployeeId",
                         column: x => x.EmployeeId,
@@ -79,8 +77,6 @@ namespace Pomelo.Migrations
                 name: "EmployeeProjectWeeklyCapacities",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
                     EmployeeId = table.Column<long>(type: "INTEGER", nullable: false),
                     ProjectId = table.Column<long>(type: "INTEGER", nullable: false),
                     Start = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -88,7 +84,7 @@ namespace Pomelo.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EmployeeProjectWeeklyCapacities", x => x.Id);
+                    table.PrimaryKey("PK_EmployeeProjectWeeklyCapacities", x => new { x.EmployeeId, x.ProjectId });
                     table.ForeignKey(
                         name: "FK_EmployeeProjectWeeklyCapacities_Employees_EmployeeId",
                         column: x => x.EmployeeId,
@@ -104,24 +100,24 @@ namespace Pomelo.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_EmployeeProjectHours_EmployeeId",
-                table: "EmployeeProjectHours",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_EmployeeProjectHours_ProjectId",
                 table: "EmployeeProjectHours",
                 column: "ProjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EmployeeProjectWeeklyCapacities_EmployeeId",
-                table: "EmployeeProjectWeeklyCapacities",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_EmployeeProjectWeeklyCapacities_ProjectId",
                 table: "EmployeeProjectWeeklyCapacities",
                 column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Employees_Department",
+                table: "Employees",
+                column: "Department");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Employees_Name",
+                table: "Employees",
+                column: "Name");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Projects_OwnerId",
