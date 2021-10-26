@@ -1,9 +1,9 @@
 import io
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from logging import LoggerAdapter
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from dataclasses_json import LetterCase, dataclass_json
 from enochecker3 import ChainDB, Enochecker, ExploitCheckerTaskMessage, GetflagCheckerTaskMessage, MumbleException, PutflagCheckerTaskMessage
@@ -27,12 +27,52 @@ class EmployeeDto:
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
+class EmployeeProjectHoursDto:
+    employee_id: int
+    project_id: int
+    total_hours: int
+    delivered_hours: int
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class EmployeeProjectWeeklyCapacityDto:
+    employee_id: int
+    project_id: int
+    start: str
+    capacity: int
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
 class ProjectDto:
     id: int
     name: str
     begin: str
     end: str
     delivered_hours_timestamp: str
+    employee_project_hours: List[EmployeeProjectHoursDto]
+    employee_project_weekly_capacities: List[EmployeeProjectWeeklyCapacityDto]
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class ProjectInfoDto:
+    id: int
+    name: str
+    begin: str
+    end: str
+    delivered_hours_timestamp: str
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class EmployeeDetailsDto:
+    id: int
+    name: str
+    note: Optional[str]
+    employee_project_hours: List[EmployeeProjectHoursDto]
+    employee_project_weekly_capacities: List[EmployeeProjectWeeklyCapacityDto]
 
 
 def create_user_name() -> str:
@@ -115,7 +155,7 @@ async def get_account(client: AsyncClient, logger: LoggerAdapter) -> EmployeeDto
     return account
 
 
-async def get_employee(client: AsyncClient, id: int, logger: LoggerAdapter) -> EmployeeDto:
+async def get_employee(client: AsyncClient, id: int, logger: LoggerAdapter) -> EmployeeDetailsDto:
     try:
         logger.debug(f"get_employee({id})")
         headers = {"User-Agent": get_user_agent()}
