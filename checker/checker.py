@@ -408,6 +408,8 @@ async def getflag_project_name(task: GetflagCheckerTaskMessage, session0: AsyncC
             pwpch = True
     if not pwpch:
         raise MumbleException("Capacities are missing")
+
+
 @checker.putflag(2)
 async def putflag_booking(task: PutflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> str:
     username0 = create_user_name()
