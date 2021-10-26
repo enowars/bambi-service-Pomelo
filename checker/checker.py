@@ -167,7 +167,7 @@ async def get_employee(client: AsyncClient, id: int, logger: LoggerAdapter) -> E
     assert_equals(response.status_code, 200, "GET /api/account/employee failed")
 
     try:
-        account = EmployeeDto.from_json(response.text)  # type: ignore
+        account = EmployeeDetailsDto.from_json(response.text)  # type: ignore
     except:
         raise MumbleException("GET /api/account/employee returned unexpected data")
 
