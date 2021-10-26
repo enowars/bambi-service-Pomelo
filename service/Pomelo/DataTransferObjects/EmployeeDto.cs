@@ -9,14 +9,12 @@
     public record EmployeeDto(
         long Id,
         string Name,
-        string Department,
         string? Note)
     {
         public EmployeeDto(Employee e)
             : this(
                   e.Id,
                   e.Name,
-                  e.Department,
                   e.Note)
         {
         }

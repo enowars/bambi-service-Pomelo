@@ -15,14 +15,12 @@ export interface EmployeeProjectWeeklyCapacityDto {
 export interface EmployeeDto {
   id: number,
   name: string,
-  department: string,
   note: string | null,
 }
 
 export interface EmployeeDetails {
   id: number,
   name: string,
-  department: string,
   note: string | null,
   employeeProjectHours: EmployeeProjectHours[],
   employeeProjectWeeklyCapacities: EmployeeProjectWeeklyCapacityDto[]

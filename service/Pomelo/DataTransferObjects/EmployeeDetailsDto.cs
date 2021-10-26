@@ -9,7 +9,6 @@
     public record EmployeeDetailsDto(
         long Id,
         string Name,
-        string Department,
         string? Note,
         List<EmployeeProjectHoursDto> EmployeeProjectHours,
         List<EmployeeProjectWeeklyCapacityDto> EmployeeProjectWeeklyCapacities)
@@ -18,7 +17,6 @@
             : this(
                   e.Id,
                   e.Name,
-                  e.Department,
                   e.Note,
                   e.EmployeeProjectHours.Select(e => new EmployeeProjectHoursDto(e)).ToList(),
                   e.EmployeeProjectWeeklyCapacities.Select(e => new EmployeeProjectWeeklyCapacityDto(e)).ToList())

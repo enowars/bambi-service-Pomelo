@@ -8,7 +8,7 @@
       You NEED information from the <a href="https://bambi6.enoflag.de/api/attackinfo">attack info endpoint</a> to exploit this service.
     </div>
     Flags are being put into user notes, project names, and booking files.
-    There are 4 intended security issues.
+    There are 3 intended security issues.
     The OpenAPI interface of this service can be found <a href="swagger">here</a>.
     Good luck!
   </div>

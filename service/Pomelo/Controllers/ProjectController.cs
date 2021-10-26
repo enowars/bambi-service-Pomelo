@@ -128,7 +128,7 @@
         }
 
         [HttpPost]
-        public async Task<ProjectDto> Capacity([FromForm] long employeeId, [FromForm] long projectId, [FromForm] DateTime start, [FromForm] long capacity)
+        public async Task<ActionResult> Capacity([FromForm] long employeeId, [FromForm] long projectId, [FromForm] DateTime start, [FromForm] long capacity)
         {
             EmployeeProjectWeeklyCapacity? weeklyProjectCapacity = await this.dbContext.EmployeeProjectWeeklyCapacities
                 .Where(wpc => wpc.ProjectId == projectId)
@@ -154,7 +154,7 @@
             }
 
             await this.dbContext.SaveChangesAsync(this.HttpContext.RequestAborted);
-            return await this.GetProjectDto(projectId);
+            return this.NoContent();
         }
 
         private async Task<ProjectDto> GetProjectDto(long projectId)
