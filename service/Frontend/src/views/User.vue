@@ -2,6 +2,12 @@
   <div v-if="this.employee">
     <h2>{{ this.employee.name }}</h2>
 
+    <h4>Note</h4>
+    <div>
+      <div>{{ this.employee.note }}</div>
+    </div>
+
+    <h4>Planned Capacity</h4>
     <table>
       <thead>
         <tr>

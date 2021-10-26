@@ -1,6 +1,13 @@
 <template>
   <h2> Overview</h2>
   <div>
+    <div>
+      <h4>Update your User Note</h4>
+      <input v-model="note" placeholder="secret note">
+      <button @click="this.updateNote()">Update</button>
+    </div>
+
+    <h4>Projects</h4>
     <table>
       <thead>
         <tr>
@@ -25,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { getProjectDepartmentProjects, postProjectCreate, Project } from '@/services/pomeloAPI'
+import { getProjectDepartmentProjects, postProjectCreate, Project, postNote } from '@/services/pomeloAPI'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -38,7 +45,8 @@ export default defineComponent({
       projectName: null as string | null,
       projects: [] as Project[],
       startDate: null as string | null,
-      endDate: null as string | null
+      endDate: null as string | null,
+      note: null as string | null
     }
   },
   methods: {
@@ -50,6 +58,12 @@ export default defineComponent({
     },
     async init() {
       this.projects = await getProjectDepartmentProjects()
+    },
+    async updateNote() {
+      if (this.note) {
+        await postNote(this.note)
+        this.note = null
+      }
     }
   }
 })

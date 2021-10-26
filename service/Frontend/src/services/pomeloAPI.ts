@@ -78,6 +78,18 @@ export const postRegister = async (employeeName: string, department: string, not
   }).then(val => val.json()) as EmployeeDetails
 }
 
+export const postNote = async (note: string) : Promise<number> => {
+  const form = new FormData()
+  form.append('note', note)
+  if (note != null) {
+    form.append('note', note)
+  }
+  return (await fetch('/api/account/note', {
+    method: 'POST',
+    body: form
+  })).status
+}
+
 // Booking Controller
 export const postBooking = async (projectId: number, file: File) : Promise<[boolean, string]> => {
   const form = new FormData()
