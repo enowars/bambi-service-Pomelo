@@ -1,7 +1,7 @@
 import io
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from logging import LoggerAdapter
 from typing import Optional, Tuple
 
@@ -66,7 +66,7 @@ def create_project_end() -> str:
 def create_capacity_date() -> str:
     utcnow = datetime.utcnow()
     d = datetime(utcnow.year, utcnow.month, utcnow.day, 0, 0, 0, 0, timezone.utc)
-    d = d + datetime.timedelta(days=-d.weekday(), weeks=1)
+    d = d + timedelta(days=-d.weekday(), weeks=1)
     return d.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
