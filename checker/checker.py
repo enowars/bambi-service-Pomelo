@@ -63,6 +63,13 @@ def create_project_end() -> str:
     return d.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
+def create_capacity_date() -> str:
+    utcnow = datetime.utcnow()
+    d = datetime(utcnow.year, utcnow.month, utcnow.day, 0, 0, 0, 0, timezone.utc)
+    d = d + datetime.timedelta(days=-d.weekday(), weeks=1)
+    return d.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
 def get_user_agent() -> str:
     return faker.user_agent()
 
@@ -199,7 +206,7 @@ async def set_hours(client: AsyncClient, employee_id: int, project_id: int, hour
     return project
 
 
-async def set_capacity(client: AsyncClient, employee_id: int, project_id: int, start: datetime, capacity: int, logger: LoggerAdapter) -> None:
+async def set_capacity(client: AsyncClient, employee_id: int, project_id: int, start: str, capacity: int, logger: LoggerAdapter) -> None:
     try:
         headers = {"User-Agent": get_user_agent()}
         response = await client.post(
@@ -250,6 +257,10 @@ async def putflag_user_note(task: PutflagCheckerTaskMessage, session0: AsyncClie
     (employee1, cookie1) = await register_user(session1, username1, department, task.flag, logger)
     flag_employee = await get_employee(session1, employee0.id, logger)
     assert_equals(task.flag, flag_employee.note, "Could not find flag in note")
+    await set_hours(session0, employee1.id, project.id, 100, logger)
+    await set_hours(session1, employee0.id, project.id, 100, logger)
+    await set_capacity(session0, employee0.id, project.id, create_capacity_date(), 10, logger)
+    await set_capacity(session1, employee1.id, project.id, create_capacity_date(), 10, logger)
 
     return json.dumps({"username": username0, "projectId": project.id,})
 
@@ -277,7 +288,7 @@ async def getflag_user_note(task: GetflagCheckerTaskMessage, session0: AsyncClie
 async def putflag_project_name(task: PutflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> str:
     username0 = create_user_name()
     department = create_department_name()
-    (_employee0, cookie0) = await register_user(session0, username0, department, None, logger)
+    (employee0, cookie0) = await register_user(session0, username0, department, None, logger)
     await db.set("cookie0", cookie0)
     await db.set("department", department)
 
@@ -286,6 +297,9 @@ async def putflag_project_name(task: PutflagCheckerTaskMessage, session0: AsyncC
     project = await create_project(session0, task.flag, begin, end, logger)
     await db.set("projectId", project.id)
     assert_equals(task.flag, project.name, "Could not find flag in project name")
+
+    await set_hours(session0, employee0.id, project.id, 100, logger)
+    await set_capacity(session0, employee0.id, project.id, create_capacity_date(), 10, logger)
 
     return json.dumps({"username": username0, "projectId": project.id,})
 
@@ -323,6 +337,9 @@ async def putflag_booking(task: PutflagCheckerTaskMessage, session0: AsyncClient
     end = create_project_end()
     project = await create_project(session0, task.flag, begin, end, logger)
     await db.set("projectId", project.id)
+
+    await set_hours(session0, employee0.id, project.id, 100, logger)
+    await set_capacity(session0, employee0.id, project.id, create_capacity_date(), 10, logger)
 
     booking_url = await upload_booking(session0, project.id, f"{task.flag}\n{employee0.id},20", logger)
     await db.set("bookingUrl", booking_url)
