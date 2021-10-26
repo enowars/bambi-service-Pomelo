@@ -324,18 +324,19 @@ async def getflag_user_note(task: GetflagCheckerTaskMessage, session0: AsyncClie
     assert_equals(task.flag, flag_employee.note, "Could not find flag in note")
 
     eph = False
-    for ph in flag_employee.employee_project_hours:
-        if ph.employee_id == employee_id:
+    for e1 in flag_employee.employee_project_hours:
+        if e1.employee_id == employee_id:
             eph = True
     if not eph:
         raise MumbleException("Planned hours are missing")
 
-    epwc = False
-    for ph in flag_employee.employee_project_weekly_capacities:
-        if ph.employee_id == employee_id:
-            eph = True
-    if not epwc:
+    wpch = False
+    for e2 in flag_employee.employee_project_weekly_capacities:
+        if e2.employee_id == employee_id:
+            wpch = True
+    if not wpch:
         raise MumbleException("Capacities are missing")
+
 
 @checker.putflag(1)
 async def putflag_project_name(task: PutflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> str:
@@ -381,17 +382,17 @@ async def getflag_project_name(task: GetflagCheckerTaskMessage, session0: AsyncC
 
     flag_employee = await get_employee(session1, employee_id, logger)
     eph = False
-    for ph in flag_employee.employee_project_hours:
-        if ph.employee_id == employee_id:
+    for e1 in flag_employee.employee_project_hours:
+        if e1.employee_id == employee_id:
             eph = True
     if not eph:
         raise MumbleException("Planned hours are missing")
 
-    epwc = False
-    for ph in flag_employee.employee_project_weekly_capacities:
-        if ph.employee_id == employee_id:
-            eph = True
-    if not epwc:
+    wpch = False
+    for e2 in flag_employee.employee_project_weekly_capacities:
+        if e2.employee_id == employee_id:
+            wpch = True
+    if not wpch:
         raise MumbleException("Capacities are missing")
 
 
