@@ -22,7 +22,6 @@ COOKIE_NAME = ".AspNetCore.Cookies"
 class EmployeeDto:
     id: int
     name: str
-    department: str
     note: Optional[str]
 
 
