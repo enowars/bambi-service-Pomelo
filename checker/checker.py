@@ -395,7 +395,19 @@ async def getflag_project_name(task: GetflagCheckerTaskMessage, session0: AsyncC
     if not wpch:
         raise MumbleException("Capacities are missing")
 
+    peph = False
+    for pe1 in project1.employee_project_hours:
+        if pe1.employee_id == employee_id:
+            peph = True
+    if not peph:
+        raise MumbleException("Planned hours are missing")
 
+    pwpch = False
+    for pe2 in project1.employee_project_weekly_capacities:
+        if pe2.employee_id == employee_id:
+            pwpch = True
+    if not pwpch:
+        raise MumbleException("Capacities are missing")
 @checker.putflag(2)
 async def putflag_booking(task: PutflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> str:
     username0 = create_user_name()
