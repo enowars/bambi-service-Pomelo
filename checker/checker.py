@@ -309,7 +309,7 @@ async def putflag_user_note(task: PutflagCheckerTaskMessage, session0: AsyncClie
 async def getflag_user_note(task: GetflagCheckerTaskMessage, session0: AsyncClient, session1: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> None:
     try:
         cookie0 = await db.get("cookie0")
-        employeeId = await db.get("employeeId")
+        employee_id = await db.get("employeeId")
         department = await db.get("department")
     except KeyError:
         raise MumbleException("Missing results from putflag")
@@ -318,11 +318,24 @@ async def getflag_user_note(task: GetflagCheckerTaskMessage, session0: AsyncClie
     account = await get_account(session0, logger)
     assert_equals(task.flag, account.note, "Could not find flag in user note")
 
-    username1 = create_user_name()
-    (employee1, cookie1) = await register_user(session1, username1, department, task.flag, logger)
-    flag_employee = await get_employee(session1, employeeId, logger)
+    username2 = create_user_name()
+    (employee2, cookie2) = await register_user(session1, username2, department, task.flag, logger)
+    flag_employee = await get_employee(session1, employee_id, logger)
     assert_equals(task.flag, flag_employee.note, "Could not find flag in note")
 
+    eph = False
+    for ph in flag_employee.employee_project_hours:
+        if ph.employee_id == employee_id:
+            eph = True
+    if not eph:
+        raise MumbleException("Planned hours are missing")
+
+    epwc = False
+    for ph in flag_employee.employee_project_weekly_capacities:
+        if ph.employee_id == employee_id:
+            eph = True
+    if not epwc:
+        raise MumbleException("Capacities are missing")
 
 @checker.putflag(1)
 async def putflag_project_name(task: PutflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> str:
@@ -331,6 +344,7 @@ async def putflag_project_name(task: PutflagCheckerTaskMessage, session0: AsyncC
     (employee0, cookie0) = await register_user(session0, username0, department, None, logger)
     await db.set("cookie0", cookie0)
     await db.set("department", department)
+    await db.set("employeeId", employee0.id)
 
     begin = create_project_begin()
     end = create_project_end()
@@ -348,6 +362,7 @@ async def putflag_project_name(task: PutflagCheckerTaskMessage, session0: AsyncC
 async def getflag_project_name(task: GetflagCheckerTaskMessage, session0: AsyncClient, session1: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> None:
     try:
         cookie0 = await db.get("cookie0")
+        employee_id = await db.get("employeeId")
         department = await db.get("department")
         project_id = await db.get("projectId")
     except KeyError:
@@ -363,6 +378,21 @@ async def getflag_project_name(task: GetflagCheckerTaskMessage, session0: AsyncC
     (employee1, cookie1) = await register_user(session1, username1, department, task.flag, logger)
     project1 = await get_project(session1, project_id, logger)
     assert_equals(task.flag, project1.name, "Could not find flag in note")
+
+    flag_employee = await get_employee(session1, employee_id, logger)
+    eph = False
+    for ph in flag_employee.employee_project_hours:
+        if ph.employee_id == employee_id:
+            eph = True
+    if not eph:
+        raise MumbleException("Planned hours are missing")
+
+    epwc = False
+    for ph in flag_employee.employee_project_weekly_capacities:
+        if ph.employee_id == employee_id:
+            eph = True
+    if not epwc:
+        raise MumbleException("Capacities are missing")
 
 
 @checker.putflag(2)
