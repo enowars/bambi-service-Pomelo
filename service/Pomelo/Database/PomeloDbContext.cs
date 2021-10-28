@@ -34,7 +34,7 @@
 
             modelBuilder.Entity<EmployeeProjectWeeklyCapacity>(e =>
             {
-                e.HasKey(e => new { e.EmployeeId, e.ProjectId });
+                e.HasKey(e => new { e.EmployeeId, e.ProjectId, e.Start });
             });
 
             modelBuilder.Entity<EmployeeProjectHours>(e =>

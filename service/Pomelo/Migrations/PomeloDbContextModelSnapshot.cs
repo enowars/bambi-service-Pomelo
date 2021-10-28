@@ -71,13 +71,13 @@ namespace Pomelo.Migrations
                     b.Property<long>("ProjectId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("Capacity")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime>("Start")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("EmployeeId", "ProjectId");
+                    b.Property<long>("Capacity")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("EmployeeId", "ProjectId", "Start");
 
                     b.HasIndex("ProjectId");
 
