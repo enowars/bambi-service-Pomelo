@@ -1,11 +1,11 @@
 <template>
   <h2> Overview</h2>
   <div>
-    Welcome to Pomelo, the PrOject MangEment pLanning platfOrm!
+    Welcome to Pomelo, the PrOject ManagEment pLanning platfOrm!
     <br>
     <br>
     <div style="color: red;">
-      You NEED information from the <a href="https://bambi6.enoflag.de/api/attackinfo">attack info endpoint</a> to exploit this service.
+      You NEED information from the <a href="https://bambi6.enoflag.de/scoreboard/attack.json">attack info endpoint</a> to exploit this service.
     </div>
     Flags are being put into user notes, project names, and booking files.
     There are 3 intended security issues.
