@@ -72,13 +72,13 @@ export default defineComponent({
       this.project = await getProjectDetails(this.projectId)
       this.departmentEmployees = await getAccountDepartment()
       this.uninvolvedEmployees = this.departmentEmployees
-      this.updateBurnDownChart(this.project)
+      this.updateBurnDownChart()
     },
     async add() {
       if (this.newEmployee != null && this.newHours != null) {
         console.log(this.newEmployee)
-        await postProjectTotalPlanning(this.newEmployee.id, this.projectId, this.newHours)
-        this.project = await getProjectDetails(this.projectId)
+        this.project = await postProjectTotalPlanning(this.newEmployee.id, this.projectId, this.newHours)
+        this.updateBurnDownChart()
       } else {
         console.log('invalid arguments')
         console.log(this.newEmployee)
@@ -106,9 +106,10 @@ export default defineComponent({
       }
       return days
     },
-    updateBurnDownChart(project: Project) {
+    updateBurnDownChart() {
       // The burndown chart starts at the last booking.
       // Bookings may happen at any time, so the begun week needs special handling.
+      const project = this.project!
       const today = new Date()
       today.setUTCHours(0, 0, 0, 0)
       const totalProjectHours = project.employeeProjectHours.reduce((sum, eph) => sum + eph.totalHours, 0)
@@ -188,6 +189,9 @@ export default defineComponent({
         var response = await postBooking(this.projectId, this.bookingFile)
         if (!response[0]) {
           alert(response[1])
+        } else {
+          this.project = await getProjectDetails(this.projectId)
+          this.updateBurnDownChart()
         }
       } else {
         console.log('no file selected')

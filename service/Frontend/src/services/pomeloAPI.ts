@@ -127,7 +127,7 @@ export const postProjectCreate = async (projectName: string, begin: Date, end: D
   }
 }
 
-export const postProjectTotalPlanning = async (employeeId: number, projectId: number, hours: number) : Promise<EmployeeProjectHours | null> => {
+export const postProjectTotalPlanning = async (employeeId: number, projectId: number, hours: number) : Promise<Project> => {
   console.log(employeeId)
   console.log(projectId)
   console.log(hours)
@@ -135,14 +135,10 @@ export const postProjectTotalPlanning = async (employeeId: number, projectId: nu
   form.append('employeeId', employeeId.toString())
   form.append('projectId', projectId.toString())
   form.append('hours', hours.toString())
-  try {
-    return await fetch('/api/project/hours', {
-      method: 'POST',
-      body: form
-    }).then(val => val.json()) as EmployeeProjectHours
-  } catch {
-    return null
-  }
+  return await fetch('/api/project/hours', {
+    method: 'POST',
+    body: form
+  }).then(val => val.json()) as Project
 }
 
 export const postWeeklyProjectCapacity = async (employeeId: number, projectId: number, start: string, capacity: number) : Promise<void> => {
