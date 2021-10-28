@@ -121,7 +121,9 @@ export default defineComponent({
       const remainingQuota = remainingWorkingDays / totalWorkingDays
       const plannedHours = []
 
-      var weekBegin = getLastMonday(new Date())
+      const begin = new Date()
+      begin.setUTCHours(0, 0, 0, 0)
+      var weekBegin = getLastMonday(begin)
       weekBegin.setUTCHours(0, 0, 0, 0)
 
       var predictedRemainingHours = totalProjectHours - deliveredProjectHours
