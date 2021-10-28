@@ -373,12 +373,12 @@ async def getflag_project_name(task: GetflagCheckerTaskMessage, session0: AsyncC
     # TODO assert project is still in department?
 
     project = await get_project(session0, project_id, logger)
-    assert_equals(task.flag, project.name, "Could not find flag in note")
+    assert_equals(task.flag, project.name, "Could not find flag in project name")
 
     username1 = create_user_name()
     (employee1, cookie1) = await register_user(session1, username1, department, task.flag, logger)
     project1 = await get_project(session1, project_id, logger)
-    assert_equals(task.flag, project1.name, "Could not find flag in note")
+    assert_equals(task.flag, project1.name, "Could not find flag in project name")
 
     flag_employee = await get_employee(session1, employee_id, logger)
     eph = False
@@ -408,6 +408,9 @@ async def getflag_project_name(task: GetflagCheckerTaskMessage, session0: AsyncC
             pwpch = True
     if not pwpch:
         raise MumbleException("Capacities are missing")
+
+    fetched_project = await set_hours(session1, employee1.id, project_id, 100, logger)
+    assert_equals(task.flag, fetched_project.name, "Could not find flag in project name")
 
 
 @checker.putflag(2)
