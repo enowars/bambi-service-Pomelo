@@ -4,7 +4,7 @@ RUN dotnet restore Pomelo/Pomelo.csproj
 COPY Pomelo Pomelo
 RUN dotnet publish Pomelo/Pomelo.csproj -c Release -o /app
 
-FROM node AS frontend-build
+FROM node:16 AS frontend-build
 RUN npm i -g vue-type-check
 COPY Frontend/package.json Frontend/package.json
 COPY Frontend/package-lock.json Frontend/package-lock.json
