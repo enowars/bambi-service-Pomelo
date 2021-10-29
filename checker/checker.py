@@ -117,7 +117,7 @@ def get_user_agent() -> str:
 
 async def test_connectivity(client: AsyncClient, logger: LoggerAdapter) -> None:
     try:
-        logger.debug(f"test_connectivity()")
+        logger.debug("test_connectivity()")
         headers = {"User-Agent": get_user_agent()}
         await client.get("/", headers=headers)
     except:
