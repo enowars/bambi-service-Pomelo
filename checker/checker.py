@@ -229,7 +229,7 @@ async def get_project(client: AsyncClient, id: int, logger: LoggerAdapter) -> Pr
     return project
 
 
-async def get_projects(client: AsyncClient, id: int, logger: LoggerAdapter) -> List[ProjectDto]:
+async def get_projects(client: AsyncClient, id: int, logger: LoggerAdapter) -> List[ProjectInfoDto]:
     try:
         logger.debug(f"get_project({id})")
         headers = {"User-Agent": get_user_agent()}
@@ -241,7 +241,7 @@ async def get_projects(client: AsyncClient, id: int, logger: LoggerAdapter) -> L
     assert_equals(response.status_code, 200, "GET /api/project/projects failed")
 
     try:
-        projects = ProjectDto.schema().loads(response.text, many=True)  # type: ignore
+        projects = ProjectInfoDto.schema().loads(response.text, many=True)  # type: ignore
     except:
         raise MumbleException("GET /api/project/projects returned unexpected data")
 
