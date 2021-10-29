@@ -7,6 +7,7 @@ from typing import List, Optional, Tuple
 
 from dataclasses_json import LetterCase, dataclass_json
 from enochecker3 import ChainDB, Enochecker, ExploitCheckerTaskMessage, GetflagCheckerTaskMessage, MumbleException, PutflagCheckerTaskMessage
+from enochecker3.types import OfflineException
 from enochecker3.utils import FlagSearcher, assert_equals
 from faker import Faker
 from httpx import AsyncClient, RequestError
@@ -112,6 +113,15 @@ def create_capacity_date() -> str:
 
 def get_user_agent() -> str:
     return faker.user_agent()
+
+
+async def test_connectivity(client: AsyncClient, logger: LoggerAdapter) -> None:
+    try:
+        logger.debug(f"test_connectivity()")
+        headers = {"User-Agent": get_user_agent()}
+        await client.get("/", headers=headers)
+    except:
+        raise OfflineException()
 
 
 async def register_user(client: AsyncClient, employeeName: str, department: str, note: Optional[str], logger: LoggerAdapter) -> Tuple[EmployeeDto, str]:
@@ -301,6 +311,7 @@ async def download_booking(client: AsyncClient, url: str, logger: LoggerAdapter)
 
 @checker.putflag(0)
 async def putflag_user_note(task: PutflagCheckerTaskMessage, session0: AsyncClient, session1: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> str:
+    await test_connectivity(session0, logger)
     username0 = create_user_name()
     department = create_department_name()
     project_name = create_project_name()
@@ -326,6 +337,7 @@ async def putflag_user_note(task: PutflagCheckerTaskMessage, session0: AsyncClie
 
 @checker.getflag(0)
 async def getflag_user_note(task: GetflagCheckerTaskMessage, session0: AsyncClient, session1: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> None:
+    await test_connectivity(session0, logger)
     try:
         cookie0 = await db.get("cookie0")
         employee_id = await db.get("employeeId")
@@ -359,6 +371,7 @@ async def getflag_user_note(task: GetflagCheckerTaskMessage, session0: AsyncClie
 
 @checker.putflag(1)
 async def putflag_project_name(task: PutflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> str:
+    await test_connectivity(session0, logger)
     username0 = create_user_name()
     department = create_department_name()
     (employee0, cookie0) = await register_user(session0, username0, department, None, logger)
@@ -390,6 +403,7 @@ async def putflag_project_name(task: PutflagCheckerTaskMessage, session0: AsyncC
 
 @checker.getflag(1)
 async def getflag_project_name(task: GetflagCheckerTaskMessage, session0: AsyncClient, session1: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> None:
+    await test_connectivity(session0, logger)
     try:
         cookie0 = await db.get("cookie0")
         employee_id = await db.get("employeeId")
@@ -444,6 +458,7 @@ async def getflag_project_name(task: GetflagCheckerTaskMessage, session0: AsyncC
 
 @checker.putflag(2)
 async def putflag_booking(task: PutflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> str:
+    await test_connectivity(session0, logger)
     username0 = create_user_name()
     department = create_department_name()
     (employee0, cookie0) = await register_user(session0, username0, department, None, logger)
@@ -466,6 +481,7 @@ async def putflag_booking(task: PutflagCheckerTaskMessage, session0: AsyncClient
 
 @checker.getflag(2)
 async def getflag_booking(task: GetflagCheckerTaskMessage, session0: AsyncClient, db: ChainDB, logger: LoggerAdapter) -> None:
+    await test_connectivity(session0, logger)
     try:
         booking_url = await db.get("bookingUrl")
     except KeyError:
