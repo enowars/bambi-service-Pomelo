@@ -121,7 +121,7 @@ async def test_connectivity(client: AsyncClient, logger: LoggerAdapter) -> None:
         headers = {"User-Agent": get_user_agent()}
         await client.get("/", headers=headers)
     except:
-        raise OfflineException()
+        raise OfflineException("Could not connect to service")
 
 
 async def register_user(client: AsyncClient, employeeName: str, department: str, note: Optional[str], logger: LoggerAdapter) -> Tuple[EmployeeDto, str]:
