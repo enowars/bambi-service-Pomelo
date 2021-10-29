@@ -120,6 +120,11 @@ namespace Pomelo.Migrations
                 column: "Name");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Projects_Department",
+                table: "Projects",
+                column: "Department");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Projects_OwnerId",
                 table: "Projects",
                 column: "OwnerId");

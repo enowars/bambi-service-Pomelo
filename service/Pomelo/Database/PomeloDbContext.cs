@@ -32,6 +32,11 @@
                 e.HasIndex(e => e.Name);
             });
 
+            modelBuilder.Entity<Project>(e =>
+            {
+                e.HasIndex(e => e.Department);
+            });
+
             modelBuilder.Entity<EmployeeProjectWeeklyCapacity>(e =>
             {
                 e.HasKey(e => new { e.EmployeeId, e.ProjectId, e.Start });

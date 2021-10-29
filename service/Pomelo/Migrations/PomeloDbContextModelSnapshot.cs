@@ -112,6 +112,8 @@ namespace Pomelo.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Department");
+
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Projects");
