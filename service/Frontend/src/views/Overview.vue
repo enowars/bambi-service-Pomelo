@@ -8,7 +8,8 @@
       You NEED information from the <a href="https://bambi6.enoflag.de/scoreboard/attack.json">attack info endpoint</a> to exploit this service.
     </div>
     Flags are being put into user notes, project names, and booking files.
-    There are 3 intended security issues.
+    There are 3 intended security issues in the backend.
+    No vulnerabilities were placed in the frontend, and during Bambi CTF #6 we do <b>not</b> emulate user agents that execute javascript.
     The OpenAPI interface of this service can be found <a href="swagger">here</a>.
     Good luck!
   </div>
