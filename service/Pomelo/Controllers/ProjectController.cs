@@ -46,7 +46,6 @@
         [HttpGet]
         public async Task<ActionResult<ProjectDto>> Project(long projectId)
         {
-            // TODO use department from session?
             var userId = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
             {

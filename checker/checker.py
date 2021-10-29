@@ -229,6 +229,25 @@ async def get_project(client: AsyncClient, id: int, logger: LoggerAdapter) -> Pr
     return project
 
 
+async def get_projects(client: AsyncClient, id: int, logger: LoggerAdapter) -> List[ProjectDto]:
+    try:
+        logger.debug(f"get_project({id})")
+        headers = {"User-Agent": get_user_agent()}
+        response = await client.get(f"/api/project/projects?projectId={id}", headers=headers)
+        logger.debug(f"{response.status_code} {response.text}")
+    except RequestError:
+        raise MumbleException("/api/project/projects request error")
+
+    assert_equals(response.status_code, 200, "GET /api/project/projects failed")
+
+    try:
+        projects = ProjectDto.schema().loads(response.text, many=True)  # type: ignore
+    except:
+        raise MumbleException("GET /api/project/projects returned unexpected data")
+
+    return projects
+
+
 async def set_hours(client: AsyncClient, employee_id: int, project_id: int, hours: int, logger: LoggerAdapter) -> ProjectDto:
     try:
         headers = {"User-Agent": get_user_agent()}
@@ -355,6 +374,16 @@ async def putflag_project_name(task: PutflagCheckerTaskMessage, session0: AsyncC
 
     await set_hours(session0, employee0.id, project.id, 100, logger)
     await set_capacity(session0, employee0.id, project.id, create_capacity_date(), 10, logger)
+
+    projects = await get_projects(session0, project.id, logger)
+    found = False
+    for p in projects:
+        if p.name == task.flag:
+            found = True
+            break
+
+    if not found:
+        raise MumbleException("Could not find flag in project name")
 
     return json.dumps({"username": username0, "projectId": project.id,})
 

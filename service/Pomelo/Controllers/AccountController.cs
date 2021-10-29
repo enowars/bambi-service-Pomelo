@@ -96,7 +96,7 @@
                 .SingleAsync(this.HttpContext.RequestAborted);
 
             return await this.dbContext.Employees
-                .Where(e => e.Department == dbUser.Department) // TODO index
+                .Where(e => e.Department == dbUser.Department)
                 .Select(e => new EmployeeDto(e))
                 .ToListAsync(this.HttpContext.RequestAborted);
         }
